@@ -18,6 +18,8 @@ export type TimerState = {
   message_sent_at: string | null;
 };
 
+export type SyncStatus = "connected" | "disconnected";
+
 export const STATE_ID = "main";
 
 export function elapsedFor(state: TimerState | null, now: number) {
@@ -40,6 +42,7 @@ export function useShow() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [state, setState] = useState<TimerState | null>(null);
   const [loading, setLoading] = useState(true);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("disconnected");
 
   const refresh = useCallback(async () => {
     const [s, t] = await Promise.all([
@@ -61,13 +64,16 @@ export function useShow() {
       .on("postgres_changes", { event: "*", schema: "public", table: "timer_state" }, () => {
         void refresh();
       })
-      .subscribe();
+      .subscribe((status) => {
+        setSyncStatus(status === "SUBSCRIBED" ? "connected" : "disconnected");
+      });
     return () => {
+      setSyncStatus("disconnected");
       void supabase.removeChannel(channel);
     };
   }, [refresh]);
 
-  return { speakers, state, loading, refresh };
+  return { speakers, state, loading, refresh, syncStatus };
 }
 
 export function useNow(active: boolean) {

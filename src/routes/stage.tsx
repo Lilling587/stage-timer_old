@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, Wifi, WifiOff } from "lucide-react";
 import { StageScreen } from "@/components/StageScreen";
 import { useNow, useShow } from "@/lib/show";
 
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/stage")({
 });
 
 function StagePage() {
-  const { speakers, state } = useShow();
+  const { speakers, state, syncStatus } = useShow();
   const now = useNow(true);
   const speaker = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;
 
@@ -100,10 +100,25 @@ function StagePage() {
     };
   }, [isFullscreen]);
 
+  const isConnected = syncStatus === "connected";
+
   return (
     <main className={`h-screen w-screen bg-stage-bg ${idle ? "cursor-none" : ""}`}>
       <h1 className="sr-only">Stage timer</h1>
       <StageScreen speaker={speaker} state={state} now={now} />
+      <div
+        role="status"
+        aria-live="polite"
+        aria-label={`Real-time sync ${isConnected ? "connected" : "disconnected"}`}
+        className={`fixed left-6 top-6 z-50 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur transition-opacity duration-300 ${
+          isConnected
+            ? "border-stage-safe/30 bg-stage-safe/10 text-stage-safe"
+            : "border-stage-danger/30 bg-stage-danger/10 text-stage-danger"
+        }`}
+      >
+        {isConnected ? <Wifi className="size-3.5" /> : <WifiOff className="size-3.5" />}
+        <span>{isConnected ? "Connected" : "Disconnected"}</span>
+      </div>
       <button
         type="button"
         onClick={() => void toggleFullscreen()}

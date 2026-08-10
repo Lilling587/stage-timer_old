@@ -149,6 +149,59 @@ function CompanionPage() {
         </div>
       </Card>
 
+      <Card className="mt-6 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Live status display</h2>
+            <p className="text-sm text-muted-foreground">
+              Exactly what Companion reads from the status endpoint, refreshed every second.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => copy(statusUrl)}>
+            Copy status URL
+          </Button>
+        </div>
+
+        <div className="mt-4 rounded-lg bg-stage p-6 text-stage-foreground" role="status">
+          {!key ? (
+            <p className="text-sm opacity-70">
+              Paste your control key above to see the live speaker and countdown here.
+            </p>
+          ) : liveError ? (
+            <p className="text-sm text-stage-danger">{liveError}</p>
+          ) : (
+            <>
+              <p className="text-sm tracking-[0.2em] uppercase opacity-70">
+                {live?.speaker ?? "No speaker on stage"}
+              </p>
+              <p className="mt-1 font-mono text-5xl font-semibold tabular-nums">
+                {live?.mmss ?? "--:--"}
+              </p>
+              <p className="mt-2 text-xs uppercase opacity-70">
+                {live ? `${live.status} · ${live.tone}` : "Connecting…"}
+              </p>
+            </>
+          )}
+        </div>
+
+        <h3 className="mt-5 text-sm font-medium">Variables to use on your buttons</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Name the Generic HTTP connection <code>timer</code>, point its polling URL at the status
+          URL above with a 1000 ms interval, then use these in any button text.
+        </p>
+        <dl className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
+          {COMPANION_VARIABLES.map((variable) => (
+            <div key={variable.name}>
+              <dt className="inline font-mono text-xs">{variable.name}</dt>
+              <dd className="inline text-muted-foreground"> — {variable.description}</dd>
+            </div>
+          ))}
+        </dl>
+        <code className="mt-4 block overflow-x-auto rounded-md bg-muted px-3 py-2 text-xs whitespace-pre-line">
+          {"Example button text:\n$(timer:speaker)\n$(timer:mmss)"}
+        </code>
+      </Card>
+
       <div className="mt-6 space-y-3">
         {COMPANION_ACTIONS.map((item) => {
           const url = urlFor(item.action, item.params);

@@ -1,24 +1,43 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Conference speaker timer — live stage countdown" },
+      {
+        name: "description",
+        content:
+          "Run your conference on time: manage speakers from the control room and show a live countdown on the stage screen.",
+      },
+      { property: "og:title", content: "Conference speaker timer — live stage countdown" },
+      {
+        property: "og:description",
+        content: "Control room and stage display that stay in sync in real time.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center">
+      <div className="max-w-xl">
+        <h1 className="text-4xl font-semibold tracking-tight">Conference speaker timer</h1>
+        <p className="mt-3 text-muted-foreground">
+          Open the control room on your laptop and the stage view on the projector. Everything
+          stays in sync in real time.
+        </p>
+      </div>
+      <div className="flex flex-wrap justify-center gap-3">
+        <Button asChild size="lg">
+          <Link to="/admin">Open control room</Link>
+        </Button>
+        <Button asChild size="lg" variant="outline">
+          <Link to="/stage">Open stage view</Link>
+        </Button>
+      </div>
+    </main>
   );
 }

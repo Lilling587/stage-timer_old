@@ -59,6 +59,12 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-stage-bg: var(--stage-bg);
+  --color-stage-fg: var(--stage-fg);
+  --color-stage-muted: var(--stage-muted);
+  --color-stage-safe: var(--stage-safe);
+  --color-stage-warn: var(--stage-warn);
+  --color-stage-danger: var(--stage-danger);
 }
 
 :root {
@@ -95,6 +101,14 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Stage screen palette (always dark, high contrast) */
+  --stage-bg: oklch(0.16 0.012 260);
+  --stage-fg: oklch(0.97 0.005 260);
+  --stage-muted: oklch(0.68 0.02 260);
+  --stage-safe: oklch(0.8 0.19 148);
+  --stage-warn: oklch(0.86 0.17 92);
+  --stage-danger: oklch(0.68 0.22 25);
 }
 
 .dark {
@@ -141,4 +155,33 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+@keyframes stage-flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@utility stage-flashing {
+  animation: stage-flash 1s steps(1, end) infinite;
+}
+
+@keyframes stage-message-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility stage-message {
+  animation: stage-message-in 0.35s ease-out;
 }

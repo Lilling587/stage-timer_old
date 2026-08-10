@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as StageRouteImport } from './routes/stage'
 import { Route as ApiPublicCompanionActionRouteImport } from './routes/api/public/companion/$action'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanionRoute = CompanionRouteImport.update({
+  id: '/companion',
+  path: '/companion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StageRoute = StageRouteImport.update({
@@ -39,12 +45,14 @@ const ApiPublicCompanionActionRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/companion': typeof CompanionRoute
   '/stage': typeof StageRoute
   '/api/public/companion/$action': typeof ApiPublicCompanionActionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/companion': typeof CompanionRoute
   '/stage': typeof StageRoute
   '/api/public/companion/$action': typeof ApiPublicCompanionActionRoute
 }
@@ -52,20 +60,29 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/companion': typeof CompanionRoute
   '/stage': typeof StageRoute
   '/api/public/companion/$action': typeof ApiPublicCompanionActionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/stage' | '/api/public/companion/$action'
+  fullPaths:
+    '/' | '/admin' | '/companion' | '/stage' | '/api/public/companion/$action'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/stage' | '/api/public/companion/$action'
-  id: '__root__' | '/' | '/admin' | '/stage' | '/api/public/companion/$action'
+  to: '/' | '/admin' | '/companion' | '/stage' | '/api/public/companion/$action'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/companion'
+    | '/stage'
+    | '/api/public/companion/$action'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CompanionRoute: typeof CompanionRoute
   StageRoute: typeof StageRoute
   ApiPublicCompanionActionRoute: typeof ApiPublicCompanionActionRoute
 }
@@ -84,6 +101,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/companion': {
+      id: '/companion'
+      path: '/companion'
+      fullPath: '/companion'
+      preLoaderRoute: typeof CompanionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stage': {
@@ -106,6 +130,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CompanionRoute: CompanionRoute,
   StageRoute: StageRoute,
   ApiPublicCompanionActionRoute: ApiPublicCompanionActionRoute,
 }

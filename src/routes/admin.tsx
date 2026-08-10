@@ -191,11 +191,16 @@ function AdminPage() {
             Control the stage timer and send messages to your speakers.
           </p>
         </div>
-        <Button variant="outline" asChild>
-          <a href="/stage" target="_blank" rel="noreferrer">
-            Open stage view
-          </a>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" asChild>
+            <a href="/companion">Companion setup</a>
+          </Button>
+          <Button variant="outline" asChild>
+            <a href="/stage" target="_blank" rel="noreferrer">
+              Open stage view
+            </a>
+          </Button>
+        </div>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">

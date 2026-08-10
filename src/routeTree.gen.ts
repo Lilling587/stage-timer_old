@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CompanionRouteImport } from './routes/companion'
 import { Route as StageRouteImport } from './routes/stage'
+import { Route as ApiPublicCompanionActionRouteImport } from './routes/api/public/companion/$action'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,40 +25,66 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompanionRoute = CompanionRouteImport.update({
+  id: '/companion',
+  path: '/companion',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StageRoute = StageRouteImport.update({
   id: '/stage',
   path: '/stage',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCompanionActionRoute =
+  ApiPublicCompanionActionRouteImport.update({
+    id: '/api/public/companion/$action',
+    path: '/api/public/companion/$action',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/companion': typeof CompanionRoute
   '/stage': typeof StageRoute
+  '/api/public/companion/$action': typeof ApiPublicCompanionActionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/companion': typeof CompanionRoute
   '/stage': typeof StageRoute
+  '/api/public/companion/$action': typeof ApiPublicCompanionActionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/companion': typeof CompanionRoute
   '/stage': typeof StageRoute
+  '/api/public/companion/$action': typeof ApiPublicCompanionActionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/stage'
+  fullPaths:
+    '/' | '/admin' | '/companion' | '/stage' | '/api/public/companion/$action'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/stage'
-  id: '__root__' | '/' | '/admin' | '/stage'
+  to: '/' | '/admin' | '/companion' | '/stage' | '/api/public/companion/$action'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/companion'
+    | '/stage'
+    | '/api/public/companion/$action'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CompanionRoute: typeof CompanionRoute
   StageRoute: typeof StageRoute
+  ApiPublicCompanionActionRoute: typeof ApiPublicCompanionActionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +103,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/companion': {
+      id: '/companion'
+      path: '/companion'
+      fullPath: '/companion'
+      preLoaderRoute: typeof CompanionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stage': {
       id: '/stage'
       path: '/stage'
       fullPath: '/stage'
       preLoaderRoute: typeof StageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/companion/$action': {
+      id: '/api/public/companion/$action'
+      path: '/api/public/companion/$action'
+      fullPath: '/api/public/companion/$action'
+      preLoaderRoute: typeof ApiPublicCompanionActionRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -88,18 +130,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CompanionRoute: CompanionRoute,
   StageRoute: StageRoute,
+  ApiPublicCompanionActionRoute: ApiPublicCompanionActionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

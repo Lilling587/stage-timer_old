@@ -118,6 +118,8 @@ async function handle(request: Request, action: string) {
   }) as StateRow;
 
   const now = Date.now();
+  const resolvedAction =
+    action === "toggle" ? (state.status === "running" ? "pause" : "start") : action;
   const currentIndex = speakers.findIndex((s) => s.id === state.current_speaker_id);
   const current = currentIndex >= 0 ? speakers[currentIndex] : undefined;
 
@@ -161,7 +163,7 @@ async function handle(request: Request, action: string) {
     return json(statusPayload(values as Partial<StateRow>, speaker));
   }
 
-  switch (action) {
+  switch (resolvedAction) {
     case "status":
       return json(statusPayload());
 
@@ -190,12 +192,6 @@ async function handle(request: Request, action: string) {
       if (error) return json({ error }, 500);
       return json(statusPayload(values as Partial<StateRow>));
     }
-
-    case "toggle":
-      return handle(
-        new Request(request.url, { method: "GET", headers: request.headers }),
-        state.status === "running" ? "pause" : "start",
-      );
 
     case "reset": {
       const values = { status: "stopped", elapsed_seconds: 0, started_at: null };

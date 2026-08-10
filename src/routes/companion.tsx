@@ -31,6 +31,8 @@ export const Route = createFileRoute("/companion")({
 function CompanionPage() {
   const [origin, setOrigin] = useState("");
   const [key, setKey] = useState("");
+  const [live, setLive] = useState<StatusPayload | null>(null);
+  const [liveError, setLiveError] = useState<string | null>(null);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -41,6 +43,41 @@ function CompanionPage() {
     query.set("key", key || "YOUR_CONTROL_KEY");
     return `${origin || "https://your-app.lovable.app"}/api/public/companion/${action}?${query.toString()}`;
   }
+
+  const statusUrl = urlFor("status");
+
+  useEffect(() => {
+    if (!key) {
+      setLive(null);
+      setLiveError(null);
+      return;
+    }
+    let cancelled = false;
+
+    async function poll() {
+      try {
+        const res = await fetch(`/api/public/companion/status?key=${encodeURIComponent(key)}`);
+        const body = (await res.json()) as StatusPayload & { error?: string };
+        if (cancelled) return;
+        if (!res.ok) {
+          setLive(null);
+          setLiveError(body.error ?? "Could not read the status endpoint");
+          return;
+        }
+        setLiveError(null);
+        setLive(body);
+      } catch {
+        if (!cancelled) setLiveError("Could not reach the status endpoint");
+      }
+    }
+
+    void poll();
+    const id = window.setInterval(poll, 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [key]);
 
   async function copy(value: string) {
     try {

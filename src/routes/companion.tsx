@@ -95,6 +95,14 @@ function CompanionPage() {
       <div className="mt-6 space-y-3">
         {COMPANION_ACTIONS.map((item) => {
           const url = urlFor(item.action, item.params);
+          const { preset } = item;
+          const presetText = [
+            `Button text: ${preset.buttonText}`,
+            `Background: ${preset.bgColor}`,
+            `Text colour: ${preset.textColor}`,
+            `Action: ${preset.companionAction}`,
+            `URL: ${url}`,
+          ].join("\n");
           return (
             <Card key={item.action} className="p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -102,13 +110,49 @@ function CompanionPage() {
                   <h3 className="font-medium">{item.label}</h3>
                   <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
-                <Button size="sm" variant="outline" onClick={() => copy(url)}>
-                  Copy URL
-                </Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => copy(url)}>
+                    Copy URL
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => copy(presetText)}>
+                    Copy preset
+                  </Button>
+                </div>
               </div>
               <code className="mt-3 block overflow-x-auto rounded-md bg-muted px-3 py-2 text-xs">
                 {url}
               </code>
+
+              <div className="mt-3 flex flex-wrap items-center gap-4 rounded-md border border-dashed p-3">
+                <div
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md text-center text-[10px] leading-tight font-semibold whitespace-pre-line"
+                  style={{ backgroundColor: preset.bgColor, color: preset.textColor }}
+                  aria-label={`Button preview: ${preset.buttonText.replace(/\\n/g, " ")}`}
+                >
+                  {preset.buttonText.replace(/\\n/g, "\n")}
+                </div>
+                <dl className="grid flex-1 gap-x-4 gap-y-1 text-xs sm:grid-cols-2">
+                  <div>
+                    <dt className="inline text-muted-foreground">Button text: </dt>
+                    <dd className="inline font-mono">{preset.buttonText}</dd>
+                  </div>
+                  <div>
+                    <dt className="inline text-muted-foreground">Companion action: </dt>
+                    <dd className="inline">{preset.companionAction}</dd>
+                  </div>
+                  <div>
+                    <dt className="inline text-muted-foreground">Background: </dt>
+                    <dd className="inline font-mono">{preset.bgColor}</dd>
+                  </div>
+                  <div>
+                    <dt className="inline text-muted-foreground">Text colour: </dt>
+                    <dd className="inline font-mono">{preset.textColor}</dd>
+                  </div>
+                  {preset.notes ? (
+                    <div className="sm:col-span-2 text-muted-foreground">{preset.notes}</div>
+                  ) : null}
+                </dl>
+              </div>
             </Card>
           );
         })}

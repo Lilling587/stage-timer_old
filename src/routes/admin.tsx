@@ -67,7 +67,10 @@ function AdminPage() {
         .from("speakers")
         .update({ name: parsed.data.name, duration_minutes: parsed.data.duration })
         .eq("id", editingId);
-      if (error) return toast.error(error.message);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       toast.success("Speaker updated");
       setEditingId(null);
     } else {
@@ -77,7 +80,10 @@ function AdminPage() {
         duration_minutes: parsed.data.duration,
         position: nextPosition,
       });
-      if (error) return toast.error(error.message);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       toast.success("Speaker added");
     }
     setName("");
@@ -101,7 +107,10 @@ function AdminPage() {
 
   async function remove(speaker: Speaker) {
     const { error } = await supabase.from("speakers").delete().eq("id", speaker.id);
-    if (error) return toast.error(error.message);
+    if (error) {
+        toast.error(error.message);
+        return;
+      }
     if (state?.current_speaker_id === speaker.id) {
       await patchState({ current_speaker_id: null, status: "stopped", elapsed_seconds: 0, started_at: null });
     }
@@ -123,7 +132,10 @@ function AdminPage() {
 
   async function start() {
     const speakerId = state?.current_speaker_id ?? speakers[0]?.id ?? null;
-    if (!speakerId) return toast.error("Add a speaker first");
+    if (!speakerId) {
+      toast.error("Add a speaker first");
+      return;
+    }
     await patchState({
       current_speaker_id: speakerId,
       status: "running",
@@ -146,7 +158,10 @@ function AdminPage() {
 
   async function next() {
     const nextSpeaker = speakers[currentIndex + 1] ?? speakers[0];
-    if (!nextSpeaker) return toast.error("Add a speaker first");
+    if (!nextSpeaker) {
+      toast.error("Add a speaker first");
+      return;
+    }
     await patchState({
       current_speaker_id: nextSpeaker.id,
       status: "stopped",
@@ -158,7 +173,10 @@ function AdminPage() {
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
     const parsed = messageSchema.safeParse(message);
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Check the message");
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Check the message");
+      return;
+    }
     await patchState({ message: parsed.data, message_sent_at: new Date().toISOString() });
     setMessage("");
     toast.success("Message sent to stage");

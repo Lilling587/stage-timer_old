@@ -5,6 +5,8 @@ export type CompanionAction = {
   params?: string;
   /** Ready-made Bitfocus Companion button preset for this control. */
   preset: CompanionPreset;
+  /** Feedbacks that recolour the button from the live status endpoint. */
+  feedbacks?: CompanionFeedback[];
 };
 
 export type CompanionPreset = {
@@ -20,7 +22,51 @@ export type CompanionPreset = {
   notes?: string;
 };
 
+/**
+ * A Companion "Internal: Variable value" feedback, driven by the variables the
+ * Generic HTTP connection polls from the status endpoint.
+ */
+export type CompanionFeedback = {
+  /** Short name shown in the panel, e.g. "Running". */
+  label: string;
+  /** Companion variable to test, e.g. "$(timer:status)". */
+  variable: string;
+  /** Comparison operator as listed in Companion. */
+  comparison: "Equal" | "Not equal";
+  /** Value to compare against. */
+  value: string;
+  /** Style applied while the feedback is true. */
+  bgColor: string;
+  textColor: string;
+  /** Plain-language explanation of what the operator sees. */
+  description: string;
+};
+
 const GET = "Generic HTTP: GET";
+
+const RUNNING = (bgColor: string, textColor: string, description: string): CompanionFeedback => ({
+  label: "Timer running",
+  variable: "$(timer:status)",
+  comparison: "Equal",
+  value: "running",
+  bgColor,
+  textColor,
+  description,
+});
+
+const NOT_RUNNING = (
+  bgColor: string,
+  textColor: string,
+  description: string,
+): CompanionFeedback => ({
+  label: "Timer not running",
+  variable: "$(timer:status)",
+  comparison: "Not equal",
+  value: "running",
+  bgColor,
+  textColor,
+  description,
+});
 
 export const COMPANION_ACTIONS: CompanionAction[] = [
   {
@@ -34,6 +80,10 @@ export const COMPANION_ACTIONS: CompanionAction[] = [
       companionAction: GET,
       notes: "Put this on the top-left button of your page so it is easy to hit under pressure.",
     },
+    feedbacks: [
+      RUNNING("#22C55E", "#000000", "Bright green while the clock is running, so you can see the show is live."),
+      NOT_RUNNING("#14532D", "#FFFFFF", "Dimmed dark green while paused or stopped — the button is ready to press."),
+    ],
   },
   {
     action: "pause",
@@ -45,6 +95,18 @@ export const COMPANION_ACTIONS: CompanionAction[] = [
       textColor: "#000000",
       companionAction: GET,
     },
+    feedbacks: [
+      RUNNING("#FACC15", "#000000", "Bright amber while running, because pausing is the useful next press."),
+      {
+        label: "Already paused",
+        variable: "$(timer:status)",
+        comparison: "Equal",
+        value: "paused",
+        bgColor: "#78350F",
+        textColor: "#FFFFFF",
+        description: "Dark amber once paused, so you can tell the pause landed.",
+      },
+    ],
   },
   {
     action: "toggle",
@@ -57,6 +119,10 @@ export const COMPANION_ACTIONS: CompanionAction[] = [
       companionAction: GET,
       notes: "Use this instead of separate start and pause buttons when you are short on space.",
     },
+    feedbacks: [
+      RUNNING("#FACC15", "#000000", "Amber while running — the next press pauses."),
+      NOT_RUNNING("#22C55E", "#000000", "Green while paused or stopped — the next press starts."),
+    ],
   },
   {
     action: "reset",
@@ -69,6 +135,18 @@ export const COMPANION_ACTIONS: CompanionAction[] = [
       companionAction: GET,
       notes: "Set the button to Latch/Release off, and consider a 2-step press so it is not hit by mistake.",
     },
+    feedbacks: [
+      {
+        label: "Clock already at full length",
+        variable: "$(timer:status)",
+        comparison: "Equal",
+        value: "stopped",
+        bgColor: "#1F2937",
+        textColor: "#9CA3AF",
+        description: "Greyed out when the timer is stopped and there is nothing to reset.",
+      },
+      RUNNING("#DC2626", "#FFFFFF", "Turns red while the clock runs, as a reminder that a reset is destructive mid-talk."),
+    ],
   },
   {
     action: "next",
@@ -80,6 +158,18 @@ export const COMPANION_ACTIONS: CompanionAction[] = [
       textColor: "#FFFFFF",
       companionAction: GET,
     },
+    feedbacks: [
+      {
+        label: "Talk finished",
+        variable: "$(timer:tone)",
+        comparison: "Equal",
+        value: "over",
+        bgColor: "#3B82F6",
+        textColor: "#000000",
+        description: "Lights up once the talk has run over, cueing you to move on.",
+      },
+      RUNNING("#1E3A8A", "#FFFFFF", "Dimmed while a talk is still running."),
+    ],
   },
   {
     action: "previous",
@@ -91,6 +181,17 @@ export const COMPANION_ACTIONS: CompanionAction[] = [
       textColor: "#FFFFFF",
       companionAction: GET,
     },
+    feedbacks: [
+      {
+        label: "First speaker on stage",
+        variable: "$(timer:speaker_position)",
+        comparison: "Equal",
+        value: "1",
+        bgColor: "#1F2937",
+        textColor: "#9CA3AF",
+        description: "Greyed out on the first speaker, where there is nothing to go back to.",
+      },
+    ],
   },
   {
     action: "select",

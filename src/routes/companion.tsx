@@ -162,7 +162,7 @@ function CompanionPage() {
           </Button>
         </div>
 
-        <div className="mt-4 rounded-lg bg-stage p-6 text-stage-foreground" role="status">
+        <div className="mt-4 rounded-lg bg-stage-bg p-6 text-stage-fg" role="status">
           {!key ? (
             <p className="text-sm opacity-70">
               Paste your control key above to see the live speaker and countdown here.

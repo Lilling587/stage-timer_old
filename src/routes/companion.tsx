@@ -7,6 +7,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { COMPANION_ACTIONS } from "@/lib/companion-actions";
 
+type StatusPayload = {
+  speaker: string | null;
+  speaker_position: number | null;
+  status: string;
+  remaining_seconds: number;
+  mmss: string;
+  tone: string;
+  message: string | null;
+  speakers: number;
+};
+
+const COMPANION_VARIABLES = [
+  { name: "$(timer:speaker)", description: "Current speaker name" },
+  { name: "$(timer:mmss)", description: "Time remaining as MM:SS" },
+  { name: "$(timer:remaining_seconds)", description: "Time remaining in seconds (can go negative)" },
+  { name: "$(timer:status)", description: "running, paused or stopped" },
+  { name: "$(timer:tone)", description: "safe, warn, danger or over — handy for button colours" },
+  { name: "$(timer:speaker_position)", description: "Position of the speaker in the list" },
+];
+
 export const Route = createFileRoute("/companion")({
   head: () => ({
     meta: [

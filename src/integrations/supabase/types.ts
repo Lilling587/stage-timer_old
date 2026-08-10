@@ -14,7 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      speakers: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: []
+      }
+      timer_state: {
+        Row: {
+          current_speaker_id: string | null
+          elapsed_seconds: number
+          id: string
+          message: string | null
+          message_sent_at: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          current_speaker_id?: string | null
+          elapsed_seconds?: number
+          id?: string
+          message?: string | null
+          message_sent_at?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          current_speaker_id?: string | null
+          elapsed_seconds?: number
+          id?: string
+          message?: string | null
+          message_sent_at?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timer_state_current_speaker_id_fkey"
+            columns: ["current_speaker_id"]
+            isOneToOne: false
+            referencedRelation: "speakers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

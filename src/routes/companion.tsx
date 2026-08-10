@@ -7,6 +7,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { COMPANION_ACTIONS } from "@/lib/companion-actions";
 
+type StatusPayload = {
+  speaker: string | null;
+  speaker_position: number | null;
+  status: string;
+  remaining_seconds: number;
+  mmss: string;
+  tone: string;
+  message: string | null;
+  speakers: number;
+};
+
+const COMPANION_VARIABLES = [
+  { name: "$(timer:speaker)", description: "Current speaker name" },
+  { name: "$(timer:mmss)", description: "Time remaining as MM:SS" },
+  { name: "$(timer:remaining_seconds)", description: "Time remaining in seconds (can go negative)" },
+  { name: "$(timer:status)", description: "running, paused or stopped" },
+  { name: "$(timer:tone)", description: "safe, warn, danger or over — handy for button colours" },
+  { name: "$(timer:speaker_position)", description: "Position of the speaker in the list" },
+];
+
 export const Route = createFileRoute("/companion")({
   head: () => ({
     meta: [
@@ -31,6 +51,8 @@ export const Route = createFileRoute("/companion")({
 function CompanionPage() {
   const [origin, setOrigin] = useState("");
   const [key, setKey] = useState("");
+  const [live, setLive] = useState<StatusPayload | null>(null);
+  const [liveError, setLiveError] = useState<string | null>(null);
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -41,6 +63,41 @@ function CompanionPage() {
     query.set("key", key || "YOUR_CONTROL_KEY");
     return `${origin || "https://your-app.lovable.app"}/api/public/companion/${action}?${query.toString()}`;
   }
+
+  const statusUrl = urlFor("status");
+
+  useEffect(() => {
+    if (!key) {
+      setLive(null);
+      setLiveError(null);
+      return;
+    }
+    let cancelled = false;
+
+    async function poll() {
+      try {
+        const res = await fetch(`/api/public/companion/status?key=${encodeURIComponent(key)}`);
+        const body = (await res.json()) as StatusPayload & { error?: string };
+        if (cancelled) return;
+        if (!res.ok) {
+          setLive(null);
+          setLiveError(body.error ?? "Could not read the status endpoint");
+          return;
+        }
+        setLiveError(null);
+        setLive(body);
+      } catch {
+        if (!cancelled) setLiveError("Could not reach the status endpoint");
+      }
+    }
+
+    void poll();
+    const id = window.setInterval(poll, 1000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [key]);
 
   async function copy(value: string) {
     try {
@@ -90,6 +147,59 @@ function CompanionPage() {
             Typed here only to build the URLs below — it is never saved in the browser.
           </p>
         </div>
+      </Card>
+
+      <Card className="mt-6 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Live status display</h2>
+            <p className="text-sm text-muted-foreground">
+              Exactly what Companion reads from the status endpoint, refreshed every second.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => copy(statusUrl)}>
+            Copy status URL
+          </Button>
+        </div>
+
+        <div className="mt-4 rounded-lg bg-stage-bg p-6 text-stage-fg" role="status">
+          {!key ? (
+            <p className="text-sm opacity-70">
+              Paste your control key above to see the live speaker and countdown here.
+            </p>
+          ) : liveError ? (
+            <p className="text-sm text-stage-danger">{liveError}</p>
+          ) : (
+            <>
+              <p className="text-sm tracking-[0.2em] uppercase opacity-70">
+                {live?.speaker ?? "No speaker on stage"}
+              </p>
+              <p className="mt-1 font-mono text-5xl font-semibold tabular-nums">
+                {live?.mmss ?? "--:--"}
+              </p>
+              <p className="mt-2 text-xs uppercase opacity-70">
+                {live ? `${live.status} · ${live.tone}` : "Connecting…"}
+              </p>
+            </>
+          )}
+        </div>
+
+        <h3 className="mt-5 text-sm font-medium">Variables to use on your buttons</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Name the Generic HTTP connection <code>timer</code>, point its polling URL at the status
+          URL above with a 1000 ms interval, then use these in any button text.
+        </p>
+        <dl className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
+          {COMPANION_VARIABLES.map((variable) => (
+            <div key={variable.name}>
+              <dt className="inline font-mono text-xs">{variable.name}</dt>
+              <dd className="inline text-muted-foreground"> — {variable.description}</dd>
+            </div>
+          ))}
+        </dl>
+        <code className="mt-4 block overflow-x-auto rounded-md bg-muted px-3 py-2 text-xs whitespace-pre-line">
+          {"Example button text:\n$(timer:speaker)\n$(timer:mmss)"}
+        </code>
       </Card>
 
       <div className="mt-6 space-y-3">

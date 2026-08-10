@@ -13,6 +13,10 @@ A set of URLs Companion can call, one per action:
 - Previous speaker
 - Toggle start/pause (single button)
 - Set live speaker by position (1, 2, 3, …)
+- Set the current speaker's talk length to an exact number of minutes
+- Set any speaker's talk length by position (e.g. speaker 3 to 15 min)
+- Add or subtract time live (+1 min, -2 min) without stopping the clock
+- Jump the clock to a specific remaining time (e.g. "5 minutes left")
 - Send a message to the stage
 - Clear the message
 - Read current status (speaker name, remaining time, running state) for Companion button feedback
@@ -32,6 +36,7 @@ A new `/companion` page in the admin area that lists every endpoint with the ful
 - New server routes under `src/routes/api/public/companion/*` (the `/api/public/*` prefix bypasses site auth), each verifying the control key before touching data.
 - Handlers use the service-role client loaded inside the handler and update `public.timer_state` / read `public.speakers` with the exact same field semantics the admin UI uses (`status`, `started_at`, `elapsed_seconds`, `current_speaker_id`, `message`, `message_sent_at`), so pause math stays consistent.
 - Requests accept both `GET` (easiest in Companion) and `POST`; input parsed with Zod.
+- Duration changes write `speakers.duration_minutes`. Add/subtract time and "set remaining" adjust `timer_state.elapsed_seconds`, re-basing `started_at` while running, so the countdown shifts without pausing.
 - A `GET /api/public/companion/status` returns JSON (`speaker`, `remaining_seconds`, `mmss`, `status`, `tone`) for Companion variables/feedback.
 - Shared control key stored as a secret; no other data exposed by the endpoints.
 - `/companion` route gets its own `head()` metadata; no changes to timer logic in `src/lib/show.ts`.

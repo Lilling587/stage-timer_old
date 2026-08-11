@@ -86,6 +86,21 @@ export function useShow() {
     };
   }, [refresh]);
 
+  // Pull fresh state when the tab regains focus or the network comes back.
+  useEffect(() => {
+    const resync = () => {
+      if (document.visibilityState === "hidden") return;
+      setSyncStatus((s) => (s === "connected" ? "syncing" : s));
+      void refresh().then(() => setSyncStatus((s) => (s === "syncing" ? "connected" : s)));
+    };
+    window.addEventListener("online", resync);
+    document.addEventListener("visibilitychange", resync);
+    return () => {
+      window.removeEventListener("online", resync);
+      document.removeEventListener("visibilitychange", resync);
+    };
+  }, [refresh]);
+
   return { speakers, state, loading, refresh, syncStatus };
 }
 

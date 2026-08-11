@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Maximize2, Minimize2, Wifi, WifiOff } from "lucide-react";
+import { Loader2, Maximize2, Minimize2, Wifi, WifiOff } from "lucide-react";
 import { StageScreen } from "@/components/StageScreen";
 import { useNow, useShow } from "@/lib/show";
 
@@ -100,7 +100,14 @@ function StagePage() {
     };
   }, [isFullscreen]);
 
-  const isConnected = syncStatus === "connected";
+  const syncLabel =
+    syncStatus === "connected" ? "Connected" : syncStatus === "syncing" ? "Syncing…" : "Disconnected";
+  const syncClass =
+    syncStatus === "connected"
+      ? "border-stage-safe/30 bg-stage-safe/10 text-stage-safe"
+      : syncStatus === "syncing"
+        ? "border-stage-warn/30 bg-stage-warn/10 text-stage-warn"
+        : "border-stage-danger/30 bg-stage-danger/10 text-stage-danger";
 
   return (
     <main className={`h-screen w-screen bg-stage-bg ${idle ? "cursor-none" : ""}`}>
@@ -109,15 +116,17 @@ function StagePage() {
       <div
         role="status"
         aria-live="polite"
-        aria-label={`Real-time sync ${isConnected ? "connected" : "disconnected"}`}
-        className={`fixed left-6 top-6 z-50 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur transition-opacity duration-300 ${
-          isConnected
-            ? "border-stage-safe/30 bg-stage-safe/10 text-stage-safe"
-            : "border-stage-danger/30 bg-stage-danger/10 text-stage-danger"
-        }`}
+        aria-label={`Real-time sync ${syncLabel}`}
+        className={`fixed left-6 top-6 z-50 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur transition-opacity duration-300 ${syncClass}`}
       >
-        {isConnected ? <Wifi className="size-3.5" /> : <WifiOff className="size-3.5" />}
-        <span>{isConnected ? "Connected" : "Disconnected"}</span>
+        {syncStatus === "connected" ? (
+          <Wifi className="size-3.5" />
+        ) : syncStatus === "syncing" ? (
+          <Loader2 className="size-3.5 animate-spin" />
+        ) : (
+          <WifiOff className="size-3.5" />
+        )}
+        <span>{syncLabel}</span>
       </div>
       <button
         type="button"

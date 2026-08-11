@@ -366,6 +366,12 @@ function AdminPage() {
 
           <Card className="p-5">
             <h2 className="text-lg font-semibold">Message to stage</h2>
+            {state?.message ? (
+              <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-400 bg-amber-50 px-4 py-2.5 text-amber-800">
+                <span className="text-sm font-semibold">⚠ Live on stage:</span>
+                <span className="text-sm italic">"{state.message}"</span>
+              </div>
+            ) : null}
             <form onSubmit={sendMessage} className="mt-4 flex gap-2">
               <Input
                 value={message}

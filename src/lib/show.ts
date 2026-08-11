@@ -18,7 +18,7 @@ export type TimerState = {
   message_sent_at: string | null;
 };
 
-export type SyncStatus = "connected" | "disconnected";
+export type SyncStatus = "connected" | "syncing" | "disconnected";
 
 export const STATE_ID = "main";
 
@@ -42,7 +42,7 @@ export function useShow() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [state, setState] = useState<TimerState | null>(null);
   const [loading, setLoading] = useState(true);
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>("disconnected");
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("syncing");
 
   const refresh = useCallback(async () => {
     const [s, t] = await Promise.all([
@@ -56,6 +56,7 @@ export function useShow() {
 
   useEffect(() => {
     void refresh();
+    let wasConnected = false;
     const channel = supabase
       .channel("show-sync")
       .on("postgres_changes", { event: "*", schema: "public", table: "speakers" }, () => {
@@ -65,11 +66,38 @@ export function useShow() {
         void refresh();
       })
       .subscribe((status) => {
-        setSyncStatus(status === "SUBSCRIBED" ? "connected" : "disconnected");
+        if (status === "SUBSCRIBED") {
+          // Reconnected after a drop: pull the latest state we may have missed.
+          if (wasConnected) {
+            setSyncStatus("syncing");
+            void refresh().then(() => setSyncStatus("connected"));
+          } else {
+            setSyncStatus("connected");
+          }
+          wasConnected = true;
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          setSyncStatus(wasConnected ? "syncing" : "disconnected");
+          wasConnected = false;
+        }
       });
     return () => {
       setSyncStatus("disconnected");
       void supabase.removeChannel(channel);
+    };
+  }, [refresh]);
+
+  // Pull fresh state when the tab regains focus or the network comes back.
+  useEffect(() => {
+    const resync = () => {
+      if (document.visibilityState === "hidden") return;
+      setSyncStatus((s) => (s === "connected" ? "syncing" : s));
+      void refresh().then(() => setSyncStatus((s) => (s === "syncing" ? "connected" : s)));
+    };
+    window.addEventListener("online", resync);
+    document.addEventListener("visibilitychange", resync);
+    return () => {
+      window.removeEventListener("online", resync);
+      document.removeEventListener("visibilitychange", resync);
     };
   }, [refresh]);
 

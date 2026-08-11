@@ -350,10 +350,15 @@ function AdminPage() {
                 aria-label="Message to stage"
               />
               <Button type="submit">Send</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => patchState({ message: "", message_sent_at: null })}
+                disabled={!state?.message}
+              >
+                Clear message
+              </Button>
             </form>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Messages fade from the stage screen after 10 seconds.
-            </p>
           </Card>
 
           <Card className="overflow-hidden p-0">

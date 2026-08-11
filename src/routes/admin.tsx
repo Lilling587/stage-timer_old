@@ -186,6 +186,16 @@ function AdminPage() {
     toast.success("Message sent to stage");
   }
 
+  async function adjustTime(minutes: number) {
+    if (!current) return;
+    const newDuration = Math.max(1, current.duration_minutes + minutes);
+    const { error } = await supabase
+      .from("speakers")
+      .update({ duration_minutes: newDuration })
+      .eq("id", current.id);
+    if (error) toast.error(error.message);
+  }
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
@@ -336,6 +346,20 @@ function AdminPage() {
               </Button>
               <Button variant="outline" onClick={next}>
                 Next speaker
+              </Button>
+            </div>
+            <div className="mt-3 grid grid-cols-4 gap-2">
+              <Button variant="outline" size="sm" onClick={() => adjustTime(-5)} disabled={!current}>
+                −5 min
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => adjustTime(-1)} disabled={!current}>
+                −1 min
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => adjustTime(1)} disabled={!current}>
+                +1 min
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => adjustTime(5)} disabled={!current}>
+                +5 min
               </Button>
             </div>
           </Card>

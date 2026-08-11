@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StageScreen } from "@/components/StageScreen";
-import { supabase } from "@/integrations/supabase/client";
+import { adminAction, type AdminActionInput } from "@/lib/admin.functions";
 import { STATE_ID, elapsedFor, useNow, useShow, type Speaker } from "@/lib/show";
 
 export const Route = createFileRoute("/admin")({
@@ -36,6 +36,8 @@ const speakerSchema = z.object({
 
 const messageSchema = z.string().trim().min(1, "Write a message first").max(200, "Keep it under 200 characters");
 
+const CONTROL_KEY_STORAGE = "stage-timer-control-key";
+
 function displayName(name: string) {
   return name.trim() === "" ? "Unnamed" : name;
 }
@@ -47,16 +49,75 @@ function AdminPage() {
   const [duration, setDuration] = useState("20");
   const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [controlKey, setControlKey] = useState("");
+  const [keyDraft, setKeyDraft] = useState("");
+
+  useEffect(() => {
+    setControlKey(window.localStorage.getItem(CONTROL_KEY_STORAGE) ?? "");
+  }, []);
 
   const current = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;
   const currentIndex = current ? speakers.findIndex((s) => s.id === current.id) : -1;
 
-  async function patchState(patch: Record<string, unknown>) {
-    const { error } = await supabase
-      .from("timer_state")
-      .update({ ...patch, updated_at: new Date().toISOString() })
-      .eq("id", STATE_ID);
-    if (error) toast.error(error.message);
+  async function run(action: AdminActionInput["action"]) {
+    try {
+      await adminAction({ data: { key: controlKey, action } });
+      return true;
+    } catch (error) {
+      const messageText = error instanceof Error ? error.message : "Something went wrong";
+      toast.error(
+        messageText.includes("Invalid control key")
+          ? "That control key is not valid. Enter it again to make changes."
+          : messageText,
+      );
+      return false;
+    }
+  }
+
+  async function patchState(patch: AdminActionInput["action"] extends never ? never : Record<string, unknown>) {
+    await run({ type: "patchState", patch: patch as never });
+  }
+
+  if (!controlKey) {
+    return (
+      <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center px-6 py-10">
+        <Card className="p-6">
+          <h1 className="text-2xl font-semibold tracking-tight">Run of show</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Enter your control key to manage speakers and the live timer. It is the same key you
+            use for Bitfocus Companion, and it is stored on this device only.
+          </p>
+          <form
+            className="mt-5 space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const trimmed = keyDraft.trim();
+              if (!trimmed) {
+                toast.error("Enter your control key");
+                return;
+              }
+              window.localStorage.setItem(CONTROL_KEY_STORAGE, trimmed);
+              setControlKey(trimmed);
+              setKeyDraft("");
+            }}
+          >
+            <div className="space-y-1.5">
+              <Label htmlFor="control-key">Control key</Label>
+              <Input
+                id="control-key"
+                type="password"
+                value={keyDraft}
+                onChange={(e) => setKeyDraft(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Unlock controls
+            </Button>
+          </form>
+        </Card>
+      </main>
+    );
   }
 
   async function submitSpeaker(e: React.FormEvent) {
@@ -67,27 +128,24 @@ function AdminPage() {
       return;
     }
     if (editingId) {
-      const { error } = await supabase
-        .from("speakers")
-        .update({ name: parsed.data.name, duration_minutes: parsed.data.duration })
-        .eq("id", editingId);
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
+      const ok = await run({
+        type: "updateSpeaker",
+        id: editingId,
+        name: parsed.data.name,
+        duration_minutes: parsed.data.duration,
+      });
+      if (!ok) return;
       toast.success("Speaker updated");
       setEditingId(null);
     } else {
       const nextPosition = speakers.length ? Math.max(...speakers.map((s) => s.position)) + 1 : 0;
-      const { error } = await supabase.from("speakers").insert({
+      const ok = await run({
+        type: "addSpeaker",
         name: parsed.data.name,
         duration_minutes: parsed.data.duration,
         position: nextPosition,
       });
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
+      if (!ok) return;
       toast.success("Speaker added");
     }
     setName("");
@@ -105,16 +163,13 @@ function AdminPage() {
     if (target < 0 || target >= speakers.length) return;
     const a = speakers[index]!;
     const b = speakers[target]!;
-    await supabase.from("speakers").update({ position: b.position }).eq("id", a.id);
-    await supabase.from("speakers").update({ position: a.position }).eq("id", b.id);
+    await run({ type: "updateSpeaker", id: a.id, position: b.position });
+    await run({ type: "updateSpeaker", id: b.id, position: a.position });
   }
 
   async function remove(speaker: Speaker) {
-    const { error } = await supabase.from("speakers").delete().eq("id", speaker.id);
-    if (error) {
-        toast.error(error.message);
-        return;
-      }
+    const ok = await run({ type: "deleteSpeaker", id: speaker.id });
+    if (!ok) return;
     if (state?.current_speaker_id === speaker.id) {
       await patchState({ current_speaker_id: null, status: "stopped", elapsed_seconds: 0, started_at: null });
     }
@@ -189,11 +244,7 @@ function AdminPage() {
   async function adjustTime(minutes: number) {
     if (!current) return;
     const newDuration = Math.max(1, current.duration_minutes + minutes);
-    const { error } = await supabase
-      .from("speakers")
-      .update({ duration_minutes: newDuration })
-      .eq("id", current.id);
-    if (error) toast.error(error.message);
+    await run({ type: "updateSpeaker", id: current.id, duration_minutes: newDuration });
   }
 
   return (

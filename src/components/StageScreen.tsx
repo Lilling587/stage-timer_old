@@ -47,15 +47,6 @@ export function StageScreen({
         {speaker ? formatClock(remaining) : "00:00"}
       </p>
 
-      <p
-        className={`uppercase tracking-[0.3em] text-stage-muted ${compact ? "text-[10px]" : "text-2xl"}`}
-      >
-        {speaker
-          ? state?.status === "running"
-            ? `${speaker.duration_minutes} min talk`
-            : (state?.status ?? "stopped")
-          : "Waiting to start"}
-      </p>
 
       {messageVisible && message ? (
         <div

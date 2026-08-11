@@ -74,7 +74,7 @@ function AdminPage() {
     }
   }
 
-  async function patchState(patch: AdminActionInput["action"] extends never ? never : Record<string, unknown>) {
+  async function patchState(patch: Record<string, unknown>) {
     await run({ type: "patchState", patch: patch as never });
   }
 

@@ -74,7 +74,7 @@ export const adminAction = createServerFn({ method: "POST" })
       if (action.duration_minutes !== undefined)
         patch["duration_minutes"] = action.duration_minutes;
       if (action.position !== undefined) patch["position"] = action.position;
-      const { error } = await supabaseAdmin.from("speakers").update(patch).eq("id", action.id);
+      const { error } = await supabaseAdmin.from("speakers").update(patch as never).eq("id", action.id);
       if (error) throw new Error(error.message);
       return { ok: true };
     }
@@ -87,7 +87,7 @@ export const adminAction = createServerFn({ method: "POST" })
 
     const { error } = await supabaseAdmin
       .from("timer_state")
-      .update({ ...action.patch, updated_at: new Date().toISOString() })
+      .update({ ...action.patch, updated_at: new Date().toISOString() } as never)
       .eq("id", STATE_ID);
     if (error) throw new Error(error.message);
     return { ok: true };

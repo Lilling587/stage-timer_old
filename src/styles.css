@@ -1,3 +1,5 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -65,6 +67,7 @@
   --color-stage-safe: var(--stage-safe);
   --color-stage-warn: var(--stage-warn);
   --color-stage-danger: var(--stage-danger);
+  --font-bebas: 'Bebas Neue', cursive;
 }
 
 :root {

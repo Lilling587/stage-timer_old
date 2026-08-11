@@ -59,7 +59,7 @@ export function StageScreen({
 
       {messageVisible && message ? (
         <div
-          className={`stage-message absolute inset-x-0 bottom-0 bg-stage-fg/10 text-center backdrop-blur ${
+          className={`stage-message absolute inset-x-0 bottom-16 bg-stage-fg/10 text-center backdrop-blur ${
             compact ? "px-3 py-2" : "px-10 py-8"
           }`}
         >

@@ -47,7 +47,6 @@ export function StageScreen({
         {speaker ? formatClock(remaining) : "00:00"}
       </p>
 
-
       {messageVisible && message ? (
         <div
           className={`stage-message absolute inset-x-0 bottom-6 bg-stage-fg/10 text-center backdrop-blur ${

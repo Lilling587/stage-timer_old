@@ -30,11 +30,15 @@ export const Route = createFileRoute("/admin")({
 });
 
 const speakerSchema = z.object({
-  name: z.string().trim().min(1, "Enter a speaker name").max(80, "Name is too long"),
+  name: z.string().trim().max(80, "Name is too long"),
   duration: z.coerce.number().int().min(1, "Minimum 1 minute").max(600, "Maximum 600 minutes"),
 });
 
 const messageSchema = z.string().trim().min(1, "Write a message first").max(200, "Keep it under 200 characters");
+
+function displayName(name: string) {
+  return name.trim() === "" ? "Unnamed" : name;
+}
 
 function AdminPage() {
   const { speakers, state } = useShow();
@@ -215,7 +219,6 @@ function AdminPage() {
                   value={name}
                   maxLength={80}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Jamie Okonkwo"
                 />
               </div>
               <div className="w-32 space-y-1.5">
@@ -259,7 +262,11 @@ function AdminPage() {
                     <span className="w-6 text-sm text-muted-foreground">{index + 1}</span>
                     <div className="min-w-40 flex-1">
                       <p className="font-medium">
-                        {speaker.name}
+                        {speaker.name.trim() === "" ? (
+                          <span className="italic text-muted-foreground">Unnamed</span>
+                        ) : (
+                          speaker.name
+                        )}
                         {speaker.id === state?.current_speaker_id ? (
                           <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
                             On stage
@@ -272,7 +279,7 @@ function AdminPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        aria-label={`Move ${speaker.name} up`}
+                        aria-label={`Move ${displayName(speaker.name)} up`}
                         onClick={() => move(index, -1)}
                         disabled={index === 0}
                       >
@@ -281,7 +288,7 @@ function AdminPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        aria-label={`Move ${speaker.name} down`}
+                        aria-label={`Move ${displayName(speaker.name)} down`}
                         onClick={() => move(index, 1)}
                         disabled={index === speakers.length - 1}
                       >
@@ -308,7 +315,14 @@ function AdminPage() {
           <Card className="p-5">
             <h2 className="text-lg font-semibold">Timer controls</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {current ? `On stage: ${current.name}` : "No speaker on stage yet"}
+              {current ? (
+                <>
+                  On stage:{" "}
+                  {current.name.trim() === "" ? <em className="italic">Unnamed</em> : current.name}
+                </>
+              ) : (
+                "No speaker on stage yet"
+              )}
             </p>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <Button onClick={start} disabled={state?.status === "running"}>

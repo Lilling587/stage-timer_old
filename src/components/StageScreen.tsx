@@ -63,7 +63,7 @@ export function StageScreen({
             compact ? "px-3 py-2" : "px-10 py-8"
           }`}
         >
-          <p className={`font-medium text-stage-fg ${compact ? "text-xs" : "text-[5vw]"}`}>
+          <p className={`font-medium text-stage-fg ${compact ? "text-xs" : "text-[3vw]"}`}>
             {message}
           </p>
         </div>

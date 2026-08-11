@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StageScreen } from "@/components/StageScreen";
 import { adminAction, type AdminActionInput } from "@/lib/admin.functions";
-import { STATE_ID, elapsedFor, useNow, useShow, type Speaker } from "@/lib/show";
+import { elapsedFor, useNow, useShow, type Speaker } from "@/lib/show";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({

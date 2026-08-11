@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Conference speaker timer — live stage countdown" },
+      { title: "Speaker timer — live stage countdown" },
       {
         name: "description",
         content:
           "Run your conference on time: manage speakers from the control room and show a live countdown on the stage screen.",
       },
-      { property: "og:title", content: "Conference speaker timer — live stage countdown" },
+      { property: "og:title", content: "Speaker Timer — live stage countdown" },
       {
         property: "og:description",
         content: "Control room and stage display that stay in sync in real time.",

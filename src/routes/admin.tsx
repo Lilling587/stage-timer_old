@@ -347,7 +347,6 @@ function AdminPage() {
                 value={message}
                 maxLength={200}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Please wrap up in 2 minutes"
                 aria-label="Message to stage"
               />
               <Button type="submit">Send</Button>

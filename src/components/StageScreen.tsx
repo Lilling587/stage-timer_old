@@ -40,7 +40,7 @@ export function StageScreen({
       </p>
 
       <p
-        className={`font-bebas tabular-nums leading-none ${toneClass[tone]} ${
+        className={`font-outfit tabular-nums leading-none ${toneClass[tone]} ${
           compact ? "text-5xl" : "text-[18vw] leading-[0.9]"
         }`}
       >

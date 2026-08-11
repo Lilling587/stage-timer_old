@@ -24,9 +24,9 @@ function Index() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center">
       <div className="max-w-xl">
-        <h1 className="text-4xl font-semibold tracking-tight">Conference speaker timer</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">Speaker Timer</h1>
         <p className="mt-3 text-muted-foreground">
-          Open the control room on your laptop and the stage view on the projector. Everything
+          Open the control room on your computer and the stage view on the projector. Everything
           stays in sync in real time.
         </p>
       </div>

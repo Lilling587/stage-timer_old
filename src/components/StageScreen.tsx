@@ -1,7 +1,4 @@
-import { useEffect, useState } from "react";
 import { elapsedFor, formatClock, toneFor, type Speaker, type TimerState } from "@/lib/show";
-
-const MESSAGE_TTL_MS = 10_000;
 
 const toneClass = {
   safe: "text-stage-safe",
@@ -21,24 +18,8 @@ export function StageScreen({
   now: number;
   compact?: boolean;
 }) {
-  const [messageVisible, setMessageVisible] = useState(false);
-  const sentAt = state?.message_sent_at ?? null;
   const message = state?.message ?? null;
-
-  useEffect(() => {
-    if (!message || !sentAt) {
-      setMessageVisible(false);
-      return;
-    }
-    const remaining = MESSAGE_TTL_MS - (Date.now() - new Date(sentAt).getTime());
-    if (remaining <= 0) {
-      setMessageVisible(false);
-      return;
-    }
-    setMessageVisible(true);
-    const id = window.setTimeout(() => setMessageVisible(false), remaining);
-    return () => window.clearTimeout(id);
-  }, [message, sentAt]);
+  const messageVisible = Boolean(message);
 
   const total = (speaker?.duration_minutes ?? 0) * 60;
   const remaining = speaker ? total - elapsedFor(state, now) : 0;
@@ -82,7 +63,7 @@ export function StageScreen({
             compact ? "px-3 py-2" : "px-10 py-8"
           }`}
         >
-          <p className={`font-medium text-stage-fg ${compact ? "text-xs" : "text-4xl"}`}>
+          <p className={`font-medium text-stage-fg ${compact ? "text-xs" : "text-[5vw]"}`}>
             {message}
           </p>
         </div>

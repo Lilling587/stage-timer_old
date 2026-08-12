@@ -413,6 +413,15 @@ function AdminPage() {
                 +5 min
               </Button>
             </div>
+            <div className="mt-3">
+              <Button
+                variant={state?.show_clock ? "default" : "outline"}
+                className="w-full"
+                onClick={() => patchState({ show_clock: !(state?.show_clock ?? false) })}
+              >
+                {state?.show_clock ? "⏱ Switch back to timer" : "🕐 Show clock instead"}
+              </Button>
+            </div>
           </Card>
 
           <Card className="p-5">

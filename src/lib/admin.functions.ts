@@ -17,7 +17,6 @@ const statePatchSchema = z
   .strict();
 
 const inputSchema = z.object({
-  key: z.string().min(1),
   action: z.discriminatedUnion("type", [
     z.object({
       type: z.literal("addSpeaker"),
@@ -47,14 +46,6 @@ export type AdminActionInput = z.infer<typeof inputSchema>;
 export const adminAction = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => inputSchema.parse(input))
   .handler(async ({ data }) => {
-    const controlKey = process.env["COMPANION_CONTROL_KEY"];
-    if (!controlKey) {
-      throw new Error("Control key is not configured yet.");
-    }
-    if (data.key !== controlKey) {
-      throw new Error("Invalid control key");
-    }
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const action = data.action;
 

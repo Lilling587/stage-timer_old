@@ -36,8 +36,6 @@ const speakerSchema = z.object({
 
 const messageSchema = z.string().trim().min(1, "Write a message first").max(200, "Keep it under 200 characters");
 
-const CONTROL_KEY_STORAGE = "stage-timer-control-key";
-
 function displayName(name: string) {
   return name.trim() === "" ? "Unnamed" : name;
 }
@@ -49,75 +47,23 @@ function AdminPage() {
   const [duration, setDuration] = useState("20");
   const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [controlKey, setControlKey] = useState("");
-  const [keyDraft, setKeyDraft] = useState("");
-
-  useEffect(() => {
-    setControlKey(window.localStorage.getItem(CONTROL_KEY_STORAGE) ?? "");
-  }, []);
 
   const current = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;
   const currentIndex = current ? speakers.findIndex((s) => s.id === current.id) : -1;
 
   async function run(action: AdminActionInput["action"]) {
     try {
-      await adminAction({ data: { key: controlKey, action } });
+      await adminAction({ data: { action } });
       return true;
     } catch (error) {
       const messageText = error instanceof Error ? error.message : "Something went wrong";
-      toast.error(
-        messageText.includes("Invalid control key")
-          ? "That control key is not valid. Enter it again to make changes."
-          : messageText,
-      );
+      toast.error(messageText);
       return false;
     }
   }
 
   async function patchState(patch: Record<string, unknown>) {
     await run({ type: "patchState", patch: patch as never });
-  }
-
-  if (!controlKey) {
-    return (
-      <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center px-6 py-10">
-        <Card className="p-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Run of show</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Enter your control key to manage speakers and the live timer. It is the same key you
-            use for Bitfocus Companion, and it is stored on this device only.
-          </p>
-          <form
-            className="mt-5 space-y-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const trimmed = keyDraft.trim();
-              if (!trimmed) {
-                toast.error("Enter your control key");
-                return;
-              }
-              window.localStorage.setItem(CONTROL_KEY_STORAGE, trimmed);
-              setControlKey(trimmed);
-              setKeyDraft("");
-            }}
-          >
-            <div className="space-y-1.5">
-              <Label htmlFor="control-key">Control key</Label>
-              <Input
-                id="control-key"
-                type="password"
-                value={keyDraft}
-                onChange={(e) => setKeyDraft(e.target.value)}
-                autoComplete="off"
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Unlock controls
-            </Button>
-          </form>
-        </Card>
-      </main>
-    );
   }
 
   async function submitSpeaker(e: React.FormEvent) {

@@ -13,6 +13,8 @@ const statePatchSchema = z
     started_at: z.string().datetime().nullable().optional(),
     message: z.string().max(200).nullable().optional(),
     message_sent_at: z.string().datetime().nullable().optional(),
+    show_clock: z.boolean().optional(),
+    blackout: z.boolean().optional(),
   })
   .strict();
 
@@ -32,7 +34,11 @@ const inputSchema = z.object({
       position: z.number().int().min(0).max(10000).optional(),
     }),
     z.object({ type: z.literal("deleteSpeaker"), id: z.string().uuid() }),
-    z.object({ type: z.literal("patchState"), patch: statePatchSchema }),
+    z.object({
+      type: z.literal("patchState"),
+      patch: statePatchSchema,
+      expected_revision: z.number().int().min(0).optional(),
+    }),
   ]),
 });
 
@@ -76,10 +82,27 @@ export const adminAction = createServerFn({ method: "POST" })
       return { ok: true };
     }
 
-    const { error } = await supabaseAdmin
+    // Optimistic concurrency: only apply the patch if the state has not moved
+    // on since this admin last saw it. A database trigger bumps `revision` on
+    // every write, including ones made from Bitfocus Companion.
+    let query = supabaseAdmin
       .from("timer_state")
-      .update({ ...action.patch, updated_at: new Date().toISOString() } as never)
+      .update({ ...action.patch } as never)
       .eq("id", STATE_ID);
+    if (action.expected_revision !== undefined) {
+      query = query.eq("revision", action.expected_revision);
+    }
+    const { data: updated, error } = await query.select("revision");
     if (error) throw new Error(error.message);
-    return { ok: true };
+
+    if (!updated || updated.length === 0) {
+      const { data: latest } = await supabaseAdmin
+        .from("timer_state")
+        .select("*")
+        .eq("id", STATE_ID)
+        .maybeSingle();
+      return { ok: false as const, conflict: true as const, latest };
+    }
+
+    return { ok: true as const, conflict: false as const, revision: updated[0]?.revision ?? null };
   });

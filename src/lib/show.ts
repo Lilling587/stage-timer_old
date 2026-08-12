@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Speaker = {
@@ -18,6 +18,7 @@ export type TimerState = {
   show_clock: boolean;
   message: string | null;
   message_sent_at: string | null;
+  revision: number;
 };
 
 export type SyncStatus = "connected" | "syncing" | "disconnected";
@@ -45,6 +46,8 @@ export function useShow() {
   const [state, setState] = useState<TimerState | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("syncing");
+  // Guards against out-of-order responses rewinding the stage to older state.
+  const seenRevision = useRef(-1);
 
   const refresh = useCallback(async () => {
     const [s, t] = await Promise.all([
@@ -52,7 +55,14 @@ export function useShow() {
       supabase.from("timer_state").select("*").eq("id", STATE_ID).maybeSingle(),
     ]);
     if (s.data) setSpeakers(s.data as Speaker[]);
-    if (t.data) setState(t.data as TimerState);
+    if (t.data) {
+      const next = t.data as TimerState;
+      const revision = next.revision ?? 0;
+      if (revision >= seenRevision.current) {
+        seenRevision.current = revision;
+        setState(next);
+      }
+    }
     setLoading(false);
   }, []);
 
@@ -121,4 +131,31 @@ export function toneFor(remaining: number) {
   if (remaining < 120) return "danger" as const;
   if (remaining < 300) return "warn" as const;
   return "safe" as const;
+}
+
+/**
+ * Tracks how many admin consoles are open right now, so operators can see when
+ * someone else is also driving the show.
+ */
+export function useAdminPresence() {
+  const [adminCount, setAdminCount] = useState(1);
+
+  useEffect(() => {
+    const key = Math.random().toString(36).slice(2);
+    const channel = supabase.channel("admin-presence", { config: { presence: { key } } });
+    channel
+      .on("presence", { event: "sync" }, () => {
+        setAdminCount(Math.max(1, Object.keys(channel.presenceState()).length));
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.track({ joined_at: new Date().toISOString() });
+        }
+      });
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return adminCount;
 }

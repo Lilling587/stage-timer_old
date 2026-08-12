@@ -40,6 +40,7 @@ export type Database = {
       }
       timer_state: {
         Row: {
+          blackout: boolean
           current_speaker_id: string | null
           elapsed_seconds: number
           id: string
@@ -51,6 +52,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          blackout?: boolean
           current_speaker_id?: string | null
           elapsed_seconds?: number
           id?: string
@@ -62,6 +64,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          blackout?: boolean
           current_speaker_id?: string | null
           elapsed_seconds?: number
           id?: string

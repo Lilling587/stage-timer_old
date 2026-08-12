@@ -46,6 +46,7 @@ export type Database = {
           id: string
           message: string | null
           message_sent_at: string | null
+          revision: number
           show_clock: boolean
           started_at: string | null
           status: string
@@ -58,6 +59,7 @@ export type Database = {
           id?: string
           message?: string | null
           message_sent_at?: string | null
+          revision?: number
           show_clock?: boolean
           started_at?: string | null
           status?: string
@@ -70,6 +72,7 @@ export type Database = {
           id?: string
           message?: string | null
           message_sent_at?: string | null
+          revision?: number
           show_clock?: boolean
           started_at?: string | null
           status?: string

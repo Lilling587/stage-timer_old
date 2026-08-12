@@ -344,7 +344,7 @@ function AdminPage() {
           <Button
             variant={state?.blackout ? "destructive" : "outline"}
             size="lg"
-            className={`w-full text-base font-bold uppercase tracking-widest ${state?.blackout ? "animate-pulse" : ""}`}
+            className={`w-full text-base font-bold uppercase tracking-widest ${state?.blackout ? "blackout-blink" : ""}`}
             onClick={() => patchState({ blackout: !(state?.blackout ?? false) })}
           >
             {state?.blackout ? "● BLACKOUT ON — Click to restore" : "⬛ Blackout stage"}

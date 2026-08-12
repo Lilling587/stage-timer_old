@@ -132,3 +132,30 @@ export function toneFor(remaining: number) {
   if (remaining < 300) return "warn" as const;
   return "safe" as const;
 }
+
+/**
+ * Tracks how many admin consoles are open right now, so operators can see when
+ * someone else is also driving the show.
+ */
+export function useAdminPresence() {
+  const [adminCount, setAdminCount] = useState(1);
+
+  useEffect(() => {
+    const key = Math.random().toString(36).slice(2);
+    const channel = supabase.channel("admin-presence", { config: { presence: { key } } });
+    channel
+      .on("presence", { event: "sync" }, () => {
+        setAdminCount(Math.max(1, Object.keys(channel.presenceState()).length));
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.track({ joined_at: new Date().toISOString() });
+        }
+      });
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return adminCount;
+}

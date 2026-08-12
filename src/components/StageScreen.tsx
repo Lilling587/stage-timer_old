@@ -36,13 +36,15 @@ export function StageScreen({
         compact ? "gap-2 px-4 py-6" : "gap-8 px-10 py-16"
       }`}
     >
-      <p
-        className={`max-w-full truncate font-semibold tracking-tight text-stage-fg ${
-          compact ? "text-base" : "text-6xl"
-        }`}
-      >
-        {speaker ? speaker.name : "No speaker selected"}
-      </p>
+     {!showClock ? (
+        <p
+          className={`max-w-full truncate font-semibold tracking-tight text-stage-fg ${
+            compact ? "text-base" : "text-6xl"
+          }`}
+        >
+          {speaker ? speaker.name : "No speaker selected"}
+        </p>
+      ) : null}
 
      <p
         className={`font-outfit tabular-nums leading-none ${showClock ? "text-stage-fg" : toneClass[tone]} ${

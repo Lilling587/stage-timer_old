@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StageScreen } from "@/components/StageScreen";
 import { adminAction, type AdminActionInput } from "@/lib/admin.functions";
-import { elapsedFor, useNow, useShow, type Speaker } from "@/lib/show";
+import { elapsedFor, useAdminPresence, useNow, useShow, type Speaker } from "@/lib/show";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -41,7 +41,8 @@ function displayName(name: string) {
 }
 
 function AdminPage() {
-  const { speakers, state } = useShow();
+  const { speakers, state, refresh } = useShow();
+  const adminCount = useAdminPresence();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
@@ -53,7 +54,16 @@ function AdminPage() {
 
   async function run(action: AdminActionInput["action"]) {
     try {
-      await adminAction({ data: { action } });
+      const result = (await adminAction({ data: { action } })) as
+        | { ok: boolean; conflict?: boolean }
+        | undefined;
+      if (result && result.conflict) {
+        await refresh();
+        toast.warning(
+          "Another admin just changed the stage. We refreshed to the latest state — check it and try again.",
+        );
+        return false;
+      }
       return true;
     } catch (error) {
       const messageText = error instanceof Error ? error.message : "Something went wrong";
@@ -62,8 +72,15 @@ function AdminPage() {
     }
   }
 
+  // Every stage write carries the revision this console last saw. If someone
+  // else changed the show in the meantime the write is rejected instead of
+  // silently overwriting them, keeping one source of truth.
   async function patchState(patch: Record<string, unknown>) {
-    await run({ type: "patchState", patch: patch as never });
+    return run({
+      type: "patchState",
+      patch: patch as never,
+      expected_revision: state?.revision,
+    });
   }
 
   async function submitSpeaker(e: React.FormEvent) {
@@ -203,6 +220,11 @@ function AdminPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {adminCount > 1 ? (
+            <span className="self-center rounded-full border border-amber-400 bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800">
+              {adminCount} admins connected
+            </span>
+          ) : null}
           <Button variant="outline" asChild>
             <a href="/companion">Companion setup</a>
           </Button>

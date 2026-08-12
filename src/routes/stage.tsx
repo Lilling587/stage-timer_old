@@ -30,17 +30,27 @@ function StagePage() {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [idle, setIdle] = useState(false);
+  const [showIOSHint, setShowIOSHint] = useState(false);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = Boolean(
+    (window.navigator as Navigator & { standalone?: boolean }).standalone,
+  );
   const idleTimer = useRef<number | null>(null);
   const wakeLock = useRef<{ release: () => Promise<void> } | null>(null);
 
   const toggleFullscreen = useCallback(async () => {
+    if (isIOS) {
+      setShowIOSHint(true);
+      window.setTimeout(() => setShowIOSHint(false), 5000);
+      return;
+    }
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else await document.documentElement.requestFullscreen();
     } catch {
       /* fullscreen may be blocked; ignore */
     }
-  }, []);
+  }, [isIOS]);
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
@@ -128,7 +138,7 @@ function StagePage() {
         )}
         <span>{syncLabel}</span>
       </div>
-      <button
+      {!(isIOS && isStandalone) && <button
         type="button"
         onClick={() => void toggleFullscreen()}
         aria-label={isFullscreen ? "Exit TV mode" : "Enter TV mode"}
@@ -137,8 +147,13 @@ function StagePage() {
         }`}
       >
         {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
-        {isFullscreen ? "Exit TV mode" : "TV mode"}
-      </button>
+        {isFullscreen ? "Exit TV mode" : isIOS ? "TV mode ⓘ" : "TV mode"}
+      </button>}
+    {showIOSHint && (
+        <div className="fixed inset-x-6 top-20 z-50 rounded-xl border border-stage-fg/20 bg-stage-bg/90 px-4 py-4 text-center text-sm text-stage-fg backdrop-blur">
+          On iPhone, tap <strong>Share → Add to Home Screen</strong> to use fullscreen mode.
+        </div>
+      )}
     </main>
   );
 }

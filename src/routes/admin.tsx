@@ -373,6 +373,14 @@ function AdminPage() {
         </div>
 
         <div className="space-y-6">
+          <Button
+            variant={state?.blackout ? "destructive" : "outline"}
+            size="lg"
+            className="w-full text-base font-bold uppercase tracking-widest"
+            onClick={() => patchState({ blackout: !(state?.blackout ?? false) })}
+          >
+            {state?.blackout ? "● BLACKOUT ON — Click to restore" : "⬛ Blackout stage"}
+          </Button>
           <Card className="p-5">
             <h2 className="text-lg font-semibold">Timer controls</h2>
             <p className="mt-1 text-sm text-muted-foreground">

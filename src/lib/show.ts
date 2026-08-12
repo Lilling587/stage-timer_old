@@ -10,6 +10,7 @@ export type Speaker = {
 
 export type TimerState = {
   id: string;
+  blackout: boolean;
   current_speaker_id: string | null;
   status: "running" | "paused" | "stopped";
   elapsed_seconds: number;

@@ -46,6 +46,7 @@ export type Database = {
           message: string | null
           message_sent_at: string | null
           started_at: string | null
+          show_clock: boolean
           status: string
           updated_at: string
         }
@@ -56,6 +57,7 @@ export type Database = {
           message?: string | null
           message_sent_at?: string | null
           started_at?: string | null
+          show_clock?: boolean
           status?: string
           updated_at?: string
         }
@@ -66,6 +68,7 @@ export type Database = {
           message?: string | null
           message_sent_at?: string | null
           started_at?: string | null
+          show_clock?: boolean
           status?: string
           updated_at?: string
         }

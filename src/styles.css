@@ -195,5 +195,5 @@
 }
 
 .blackout-blink {
-  animation: blackout-blink 2.5s ease-in-out infinite;
+  animation: blackout-blink 3s ease-in-out infinite;
 }

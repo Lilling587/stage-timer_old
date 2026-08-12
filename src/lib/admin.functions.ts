@@ -85,6 +85,19 @@ export const adminAction = createServerFn({ method: "POST" })
     // Optimistic concurrency: only apply the patch if the state has not moved
     // on since this admin last saw it. A database trigger bumps `revision` on
     // every write, including ones made from Bitfocus Companion.
+    if (Object.keys(action.patch).length === 0) {
+      const { data: current } = await supabaseAdmin
+        .from("timer_state")
+        .select("revision")
+        .eq("id", STATE_ID)
+        .maybeSingle();
+      return {
+        ok: true as const,
+        conflict: false as const,
+        revision: current?.revision ?? null,
+      };
+    }
+
     let query = supabaseAdmin
       .from("timer_state")
       .update({ ...action.patch } as never)

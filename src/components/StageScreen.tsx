@@ -27,6 +27,18 @@ export function StageScreen({
   const remaining = speaker ? total - elapsedFor(state, now) : 0;
   const tone = toneFor(remaining);
 
+  if (state?.blackout) {
+    return (
+      <div className="relative flex h-full w-full items-center justify-center bg-black">
+        {compact ? (
+          <p className="text-sm font-bold uppercase tracking-widest text-red-500">
+            Blackout active
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div
       className={`relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-stage-bg ${

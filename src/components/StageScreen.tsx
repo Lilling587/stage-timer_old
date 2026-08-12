@@ -20,6 +20,8 @@ export function StageScreen({
 }) {
   const message = state?.message ?? null;
   const messageVisible = Boolean(message);
+  const showClock = state?.show_clock ?? false;
+  const wallClock = new Date(now).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
 
   const total = (speaker?.duration_minutes ?? 0) * 60;
   const remaining = speaker ? total - elapsedFor(state, now) : 0;
@@ -39,12 +41,12 @@ export function StageScreen({
         {speaker ? speaker.name : "No speaker selected"}
       </p>
 
-      <p
-        className={`font-outfit tabular-nums leading-none ${toneClass[tone]} ${
+     <p
+        className={`font-outfit tabular-nums leading-none ${showClock ? "text-stage-fg" : toneClass[tone]} ${
           compact ? "text-5xl" : "text-[18vw] leading-[0.9]"
         }`}
       >
-        {speaker ? formatClock(remaining) : "00:00"}
+        {showClock ? wallClock : speaker ? formatClock(remaining) : "00:00"}
       </p>
 
       {messageVisible && message ? (

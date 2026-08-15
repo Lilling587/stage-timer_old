@@ -61,6 +61,7 @@ const accentButton =
 function AdminPage() {
   const { speakers, state, refresh, syncStatus } = useShow();
   const adminCount = useAdminPresence();
+  const { displayMode, setDisplayMode } = useDisplayModeControl();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");

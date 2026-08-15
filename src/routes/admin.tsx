@@ -614,7 +614,7 @@ function AdminPage() {
               </div>
             </form>
 
-            <div className="mt-4 flex flex-col gap-3">
+            <div className="mt-4 flex flex-row gap-3">
               <button
                 type="button"
                 aria-pressed={displayMode === "elapsed"}

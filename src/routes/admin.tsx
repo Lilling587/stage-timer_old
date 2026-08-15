@@ -6,7 +6,6 @@ import { StageScreen } from "@/components/StageScreen";
 import type { AdminActionInput } from "@/lib/admin-actions";
 import { adminAction } from "@/lib/admin.functions";
 import {
-  DEFAULT_THRESHOLDS,
   elapsedFor,
   formatClock,
   toneFor,
@@ -444,6 +443,12 @@ function AdminPage() {
                 className="text-[10px] font-bold uppercase tracking-[0.2em] text-console-muted transition-colors hover:text-console-fg"
               >
                 Stage view
+              </a>
+              <a
+                href="/settings"
+                className="text-[10px] font-bold uppercase tracking-[0.2em] text-console-muted transition-colors hover:text-console-fg"
+              >
+                Settings
               </a>
             </nav>
           </div>

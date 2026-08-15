@@ -4,7 +4,15 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { StageScreen } from "@/components/StageScreen";
 import { adminAction, type AdminActionInput } from "@/lib/admin.functions";
-import { elapsedFor, useAdminPresence, useNow, useShow, type Speaker } from "@/lib/show";
+import {
+  elapsedFor,
+  formatClock,
+  toneFor,
+  useAdminPresence,
+  useNow,
+  useShow,
+  type Speaker,
+} from "@/lib/show";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({

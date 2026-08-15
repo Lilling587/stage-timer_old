@@ -1,0 +1,74 @@
+<svg viewBox="0 0 640 380" xmlns="http://www.w3.org/2000/svg" style="font-family: var(--font-sans)">
+  <style>
+    .lbl { font-size: 14px; font-weight: 480; fill: hsl(var(--foreground)); }
+    .sm { font-size: 12px; fill: hsl(var(--muted-foreground)); }
+    .tag { font-size: 12px; fill: hsl(var(--border)); }
+    .box { fill: none; stroke: hsl(var(--muted-foreground)); stroke-width: 1; }
+    .fill { fill: hsl(var(--muted)); stroke: none; }
+    .rail { stroke: hsl(var(--border)); stroke-width: 1; }
+  </style>
+
+  <!-- sidebar -->
+  <rect x="8" y="8" width="150" height="360" rx="8" class="box"/>
+  <text x="20" y="30" class="tag">run of show</text>
+  <rect x="20" y="40" width="126" height="34" rx="8" class="box"/>
+  <text x="30" y="61" class="sm">add speaker</text>
+
+  <rect x="20" y="86" width="126" height="52" rx="8" class="box" stroke="hsl(var(--accent-foreground))"/>
+  <rect x="20" y="86" width="4" height="52" rx="2" fill="hsl(var(--accent-foreground))" stroke="none"/>
+  <text x="32" y="106" class="lbl">Live speaker</text>
+  <text x="32" y="124" class="sm">set live · edit · delete</text>
+
+  <rect x="20" y="148" width="126" height="40" rx="8" class="box"/>
+  <text x="32" y="172" class="sm">upcoming</text>
+  <rect x="20" y="196" width="126" height="40" rx="8" class="box"/>
+  <text x="32" y="220" class="sm">upcoming</text>
+  <line x1="20" y1="336" x2="146" y2="336" class="rail"/>
+  <text x="20" y="354" class="sm">sync · admins</text>
+
+  <!-- header -->
+  <rect x="170" y="8" width="462" height="40" rx="8" class="box"/>
+  <text x="184" y="33" class="lbl">Command</text>
+  <text x="270" y="33" class="sm">companion · stage view</text>
+  <text x="530" y="33" class="sm">sync status</text>
+
+  <!-- stage preview -->
+  <rect x="170" y="60" width="290" height="140" rx="8" class="fill"/>
+  <rect x="170" y="60" width="290" height="140" rx="8" class="box"/>
+  <text x="184" y="80" class="tag">live stage preview</text>
+  <text x="258" y="145" class="lbl">12:44 · speaker</text>
+
+  <!-- time adjust -->
+  <rect x="170" y="212" width="140" height="86" rx="8" class="box"/>
+  <text x="182" y="232" class="tag">time adjust</text>
+  <rect x="182" y="244" width="26" height="24" rx="8" class="box"/>
+  <rect x="212" y="244" width="26" height="24" rx="8" class="box"/>
+  <rect x="242" y="244" width="26" height="24" rx="8" class="box"/>
+  <rect x="272" y="244" width="26" height="24" rx="8" class="box"/>
+  <text x="182" y="288" class="sm">−5 −1 +1 +5</text>
+
+  <!-- transport -->
+  <rect x="320" y="212" width="140" height="86" rx="8" class="box"/>
+  <rect x="332" y="226" width="58" height="30" rx="8" fill="hsl(var(--accent))" stroke="none"/>
+  <text x="345" y="246" style="font-size:12px" fill="hsl(var(--accent-foreground))">Start</text>
+  <rect x="396" y="226" width="52" height="30" rx="8" class="box"/>
+  <text x="406" y="246" class="sm">Pause</text>
+  <rect x="332" y="264" width="58" height="22" rx="8" class="box"/>
+  <text x="342" y="279" class="sm">Reset</text>
+  <rect x="396" y="264" width="52" height="22" rx="8" class="box"/>
+  <text x="408" y="279" class="sm">Next</text>
+
+  <!-- messaging -->
+  <rect x="472" y="60" width="160" height="176" rx="8" class="box"/>
+  <text x="484" y="80" class="tag">stage messaging</text>
+  <rect x="484" y="92" width="136" height="76" rx="8" class="fill"/>
+  <rect x="484" y="180" width="64" height="26" rx="8" class="box"/>
+  <text x="498" y="197" class="sm">Clear</text>
+  <rect x="556" y="180" width="64" height="26" rx="8" class="box"/>
+  <text x="568" y="197" class="sm">Send</text>
+
+  <rect x="472" y="248" width="160" height="36" rx="8" class="box"/>
+  <text x="484" y="271" class="sm">clock toggle</text>
+  <rect x="472" y="296" width="160" height="40" rx="8" class="box" stroke="hsl(var(--destructive))"/>
+  <text x="484" y="321" style="font-size:12px" fill="hsl(var(--destructive))">Blackout stage</text>
+</svg>

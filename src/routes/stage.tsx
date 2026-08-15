@@ -7,13 +7,13 @@ import { useNow, useShow, useStageThresholds } from "@/lib/show";
 export const Route = createFileRoute("/stage")({
   head: () => ({
     meta: [
-      { title: "Stage timer — Conference speaker timer" },
+      { title: "Stage Timer" },
       {
         name: "description",
         content:
           "Full-screen countdown for the stage: current speaker, time remaining, and live messages from the crew.",
       },
-      { property: "og:title", content: "Stage timer — Conference speaker timer" },
+      { property: "og:title", content: "Stage Timer" },
       {
         property: "og:description",
         content: "Full-screen countdown display for conference stages and projectors.",

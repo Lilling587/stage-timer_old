@@ -458,18 +458,18 @@ function AdminPage() {
               </div>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              <div className="rounded-2xl border border-console-line bg-console-surface p-6">
+            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
+              <div className="rounded-2xl border border-console-line bg-console-surface p-4 sm:p-6">
                 <p className="mb-4 text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-dim">
                   Time adjustments
                 </p>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 gap-2 xs:grid-cols-4 sm:grid-cols-4 sm:gap-3">
                   {[-5, -1, 1, 5].map((delta) => (
                     <button
                       key={delta}
                       onClick={() => adjustTime(delta)}
                       disabled={!current}
-                      className="rounded-xl border border-console-line bg-console-bg py-3.5 font-console-mono text-sm text-console-accent transition-all hover:border-console-accent/50 hover:bg-console-panel active:scale-95 disabled:pointer-events-none disabled:opacity-40"
+                      className="rounded-xl border border-console-line bg-console-bg py-3 font-console-mono text-sm text-console-accent transition-all hover:border-console-accent/50 hover:bg-console-panel active:scale-95 disabled:pointer-events-none disabled:opacity-40 sm:py-3.5"
                     >
                       {delta > 0 ? `+${delta}m` : `${delta}m`}
                     </button>
@@ -491,40 +491,40 @@ function AdminPage() {
                 </p>
               </div>
 
-              <div className="flex flex-col justify-center rounded-2xl border border-console-line bg-console-surface p-6">
-                <div className="flex gap-4">
+              <div className="flex flex-col justify-center rounded-2xl border border-console-line bg-console-surface p-4 sm:p-6">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <button
                     onClick={start}
                     disabled={state?.status === "running"}
-                    className="flex-1 rounded-xl bg-console-accent py-5 text-sm font-bold uppercase tracking-[0.2em] text-console-accent-fg shadow-[0_10px_25px_-10px_var(--console-accent)] transition-all hover:bg-console-accent-hover active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-40"
+                    className="min-w-0 truncate rounded-xl bg-console-accent py-4 text-xs font-bold uppercase tracking-[0.15em] text-console-accent-fg shadow-[0_10px_25px_-10px_var(--console-accent)] transition-all hover:bg-console-accent-hover active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-40 sm:py-5 sm:text-sm sm:tracking-[0.2em]"
                   >
                     Start
                   </button>
                   <button
                     onClick={pause}
                     disabled={state?.status !== "running"}
-                    className="flex-1 rounded-xl bg-console-raised py-5 text-sm font-bold uppercase tracking-[0.2em] text-console-fg transition-all hover:bg-console-line active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-40"
+                    className="min-w-0 truncate rounded-xl bg-console-raised py-4 text-xs font-bold uppercase tracking-[0.15em] text-console-fg transition-all hover:bg-console-line active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-40 sm:py-5 sm:text-sm sm:tracking-[0.2em]"
                   >
                     Pause
                   </button>
                 </div>
-                <div className="mt-4 flex gap-4">
-                  <button onClick={reset} className={`flex-1 ${ghostButton}`}>
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:mt-4 sm:gap-4">
+                  <button onClick={reset} className={`min-w-0 truncate ${ghostButton}`}>
                     Reset timer
                   </button>
-                  <button onClick={next} className={`flex-1 ${ghostButton}`}>
+                  <button onClick={next} className={`min-w-0 truncate ${ghostButton}`}>
                     Next up
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="mt-2 grid gap-6 sm:grid-cols-2">
+            <div className="mt-2 grid gap-4 sm:grid-cols-2 sm:gap-6">
               <div className="hidden sm:block" />
               <button
                 type="button"
                 onClick={() => patchState({ blackout: !(state?.blackout ?? false) })}
-                className={`w-full rounded-xl border py-3 text-[10px] font-extrabold uppercase tracking-[0.25em] transition-all active:scale-[0.98] ${
+                className={`w-full truncate rounded-xl border px-3 py-3 text-[10px] font-extrabold uppercase tracking-[0.2em] transition-all active:scale-[0.98] sm:tracking-[0.25em] ${
                   state?.blackout
                     ? "blackout-blink border-console-danger bg-console-danger text-console-accent-fg"
                     : "border-console-danger/40 bg-console-danger/10 text-console-danger hover:bg-console-danger hover:text-console-accent-fg"

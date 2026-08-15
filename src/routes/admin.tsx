@@ -623,7 +623,7 @@ function AdminPage() {
                   setDisplayMode(next);
                   void patchState({ display_mode: next });
                 }}
-                className={`w-full ${displayMode === "elapsed" ? accentButton : ghostButton}`}
+                className={`flex-[2] ${displayMode === "elapsed" ? accentButton : ghostButton}`}
               >
                 Timer remaining/elapsed
               </button>

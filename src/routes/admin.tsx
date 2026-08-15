@@ -460,7 +460,7 @@ function AdminPage() {
 
         <div className="grid flex-1 gap-6 p-6 lg:grid-cols-12 lg:gap-8 lg:p-8">
           <section className="flex flex-col gap-6 lg:col-span-8 lg:gap-8">
-            <div className="relative aspect-video max-h-[360px] overflow-hidden rounded-3xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
+            <div className="relative h-[180px] w-full overflow-hidden rounded-3xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
               <StageScreen
                 speaker={current}
                 state={state}

@@ -570,13 +570,15 @@ function AdminPage() {
                 Companion
               </a>
               <a
-                href="/stage"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[10px] font-bold uppercase tracking-[0.2em] text-console-muted transition-colors hover:text-console-fg"
-              >
-                Stage view
-              </a>
+                <div className="flex flex-col items-end">
+            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-console-dim">
+              Realtime sync
+            </span>
+            <span className="flex items-center gap-2 font-console-mono text-[11px] font-bold text-console-accent">
+              {syncLabel}
+              <span className={`h-2 w-2 rounded-full ${syncDot}`} />
+            </span>
+          </div>
               <a
                 href="/settings"
                 className="text-[10px] font-bold uppercase tracking-[0.2em] text-console-muted transition-colors hover:text-console-fg"

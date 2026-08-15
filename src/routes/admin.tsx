@@ -1,5 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { StageScreen } from "@/components/StageScreen";
@@ -62,6 +81,145 @@ const ghostButton =
 const accentButton =
   "rounded-lg bg-console-accent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-accent-fg transition-all hover:bg-console-accent-hover active:scale-95 disabled:pointer-events-none disabled:opacity-40";
 
+type SpeakerCardProps = {
+  speaker: Speaker;
+  index: number;
+  total: number;
+  isLive: boolean;
+  confirming: boolean;
+  onConfirmChange: (id: string | null) => void;
+  onMove: (index: number, delta: number) => void;
+  onSelect: (speaker: Speaker) => void;
+  onEdit: (speaker: Speaker) => void;
+  onRemove: (speaker: Speaker) => void;
+};
+
+function SpeakerCard({
+  speaker,
+  index,
+  total,
+  isLive,
+  confirming,
+  onConfirmChange,
+  onMove,
+  onSelect,
+  onEdit,
+  onRemove,
+}: SpeakerCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: speaker.id,
+  });
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`relative overflow-hidden rounded-xl border p-3 transition-colors ${
+        isDragging ? "z-10 opacity-80 shadow-lg" : ""
+      } ${
+        isLive
+          ? "border-console-accent/50 bg-console-panel shadow-[0_8px_30px_-12px_var(--console-accent)]"
+          : "border-console-line bg-console-surface hover:border-console-raised"
+      }`}
+    >
+      {isLive ? <span className="absolute inset-y-0 left-0 w-1 bg-console-accent" /> : null}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-start gap-2">
+          <button
+            type="button"
+            aria-label={`Reorder ${displayName(speaker.name)}`}
+            className="mt-1 cursor-grab touch-none rounded-md p-1 text-console-dim transition-colors hover:bg-console-raised hover:text-console-fg active:cursor-grabbing"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+          <div className="min-w-0">
+            {isLive ? (
+              <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.2em] text-console-accent">
+                Now speaking
+              </p>
+            ) : (
+              <p className="mb-1 font-console-mono text-[9px] uppercase tracking-[0.2em] text-console-dim">
+                {String(index + 1).padStart(2, "0")}
+              </p>
+            )}
+            <h3 className="truncate font-sora text-base font-bold leading-tight">
+              {speaker.name.trim() === "" ? (
+                <span className="italic text-console-muted">Unnamed</span>
+              ) : (
+                speaker.name
+              )}
+            </h3>
+            <p className="mt-1 font-console-mono text-[10px] text-console-muted">
+              {speaker.duration_minutes} min
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          <button
+            aria-label={`Move ${displayName(speaker.name)} up`}
+            onClick={() => onMove(index, -1)}
+            disabled={index === 0}
+            className="rounded-md p-1.5 text-xs text-console-muted transition-colors hover:bg-console-raised hover:text-console-fg disabled:pointer-events-none disabled:opacity-30"
+          >
+            ↑
+          </button>
+          <button
+            aria-label={`Move ${displayName(speaker.name)} down`}
+            onClick={() => onMove(index, 1)}
+            disabled={index === total - 1}
+            className="rounded-md p-1.5 text-xs text-console-muted transition-colors hover:bg-console-raised hover:text-console-fg disabled:pointer-events-none disabled:opacity-30"
+          >
+            ↓
+          </button>
+        </div>
+      </div>
+      <div className="mt-2.5 flex gap-2">
+        {confirming ? (
+          <>
+            <span className="flex-1 self-center text-[11px] text-console-muted">
+              Delete {displayName(speaker.name)}?
+            </span>
+            <button
+              onClick={() => {
+                onConfirmChange(null);
+                void onRemove(speaker);
+              }}
+              className="rounded-lg border border-console-danger/40 bg-console-danger/15 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-danger transition-colors hover:bg-console-danger/25"
+            >
+              Confirm
+            </button>
+            <button onClick={() => onConfirmChange(null)} className={ghostButton}>
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => onSelect(speaker)}
+              disabled={isLive}
+              className={`flex-1 ${isLive ? accentButton : ghostButton}`}
+            >
+              {isLive ? "On stage" : "Set live"}
+            </button>
+            <button onClick={() => onEdit(speaker)} className={ghostButton}>
+              Edit
+            </button>
+            <button
+              onClick={() => onConfirmChange(speaker.id)}
+              aria-label={`Delete ${displayName(speaker.name)}`}
+              className="rounded-lg border border-console-danger/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-danger transition-colors hover:bg-console-danger/15"
+            >
+              Delete?
+            </button>
+          </>
+        )}
+      </div>
+    </li>
+  );
+}
+
 function AdminPage() {
   const { speakers, state, refresh, syncStatus } = useShow();
   const adminCount = useAdminPresence();
@@ -74,6 +232,11 @@ function AdminPage() {
   const [duration, setDuration] = useState("20");
   const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const current = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;
   const currentIndex = current ? speakers.findIndex((s) => s.id === current.id) : -1;
@@ -154,6 +317,22 @@ function AdminPage() {
     const b = speakers[target]!;
     await run({ type: "updateSpeaker", id: a.id, position: b.position });
     await run({ type: "updateSpeaker", id: b.id, position: a.position });
+  }
+
+  async function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = speakers.findIndex((s) => s.id === active.id);
+    const to = speakers.findIndex((s) => s.id === over.id);
+    if (from === -1 || to === -1) return;
+    const ordered = arrayMove(speakers, from, to);
+    const positions = speakers.map((s) => s.position).sort((x, y) => x - y);
+    for (let i = 0; i < ordered.length; i += 1) {
+      const speaker = ordered[i]!;
+      const position = positions[i]!;
+      if (speaker.position === position) continue;
+      await run({ type: "updateSpeaker", id: speaker.id, position });
+    }
   }
 
   async function remove(speaker: Speaker) {
@@ -330,85 +509,35 @@ function AdminPage() {
             </p>
           ) : null}
 
-          <ul className="space-y-2">
-            {speakers.map((speaker, index) => {
-              const isLive = speaker.id === state?.current_speaker_id;
-              return (
-                <li
-                  key={speaker.id}
-                  className={`relative overflow-hidden rounded-xl border p-3 transition-all ${
-                    isLive
-                      ? "border-console-accent/50 bg-console-panel shadow-[0_8px_30px_-12px_var(--console-accent)]"
-                      : "border-console-line bg-console-surface hover:border-console-raised"
-                  }`}
-                >
-                  {isLive ? (
-                    <span className="absolute inset-y-0 left-0 w-1 bg-console-accent" />
-                  ) : null}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      {isLive ? (
-                        <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.2em] text-console-accent">
-                          Now speaking
-                        </p>
-                      ) : (
-                        <p className="mb-1 font-console-mono text-[9px] uppercase tracking-[0.2em] text-console-dim">
-                          {String(index + 1).padStart(2, "0")}
-                        </p>
-                      )}
-                      <h3 className="truncate font-sora text-base font-bold leading-tight">
-                        {speaker.name.trim() === "" ? (
-                          <span className="italic text-console-muted">Unnamed</span>
-                        ) : (
-                          speaker.name
-                        )}
-                      </h3>
-                      <p className="mt-1 font-console-mono text-[10px] text-console-muted">
-                        {speaker.duration_minutes} min
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <button
-                        aria-label={`Move ${displayName(speaker.name)} up`}
-                        onClick={() => move(index, -1)}
-                        disabled={index === 0}
-                        className="rounded-md p-1.5 text-xs text-console-muted transition-colors hover:bg-console-raised hover:text-console-fg disabled:pointer-events-none disabled:opacity-30"
-                      >
-                        ↑
-                      </button>
-                      <button
-                        aria-label={`Move ${displayName(speaker.name)} down`}
-                        onClick={() => move(index, 1)}
-                        disabled={index === speakers.length - 1}
-                        className="rounded-md p-1.5 text-xs text-console-muted transition-colors hover:bg-console-raised hover:text-console-fg disabled:pointer-events-none disabled:opacity-30"
-                      >
-                        ↓
-                      </button>
-                    </div>
-                  </div>
-                  <div className="mt-2.5 flex gap-2">
-                    <button
-                      onClick={() => selectSpeaker(speaker)}
-                      disabled={isLive}
-                      className={`flex-1 ${isLive ? accentButton : ghostButton}`}
-                    >
-                      {isLive ? "On stage" : "Set live"}
-                    </button>
-                    <button onClick={() => startEdit(speaker)} className={ghostButton}>
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => remove(speaker)}
-                      aria-label={`Delete ${displayName(speaker.name)}`}
-                      className="rounded-lg border border-console-danger/30 px-3 text-console-danger transition-colors hover:bg-console-danger/15"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis]}
+            onDragEnd={onDragEnd}
+          >
+            <SortableContext
+              items={speakers.map((s) => s.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <ul className="space-y-2">
+                {speakers.map((speaker, index) => (
+                  <SpeakerCard
+                    key={speaker.id}
+                    speaker={speaker}
+                    index={index}
+                    total={speakers.length}
+                    isLive={speaker.id === state?.current_speaker_id}
+                    confirming={confirmingId === speaker.id}
+                    onConfirmChange={setConfirmingId}
+                    onMove={move}
+                    onSelect={selectSpeaker}
+                    onEdit={startEdit}
+                    onRemove={remove}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
         </div>
 
         <div className="flex items-center justify-between border-t border-console-line bg-console-bg px-4 py-3 font-console-mono text-[9px] text-console-muted">
@@ -639,18 +768,6 @@ function AdminPage() {
                   className={ghostButton}
                 >
                   Clear
-                </button>
-              </div>
-                <button
-                  type="button"
-                  onClick={() => patchState({ message: "", message_sent_at: null })}
-                  disabled={!state?.message}
-                  className={ghostButton}
-                >
-                  Clear
-                </button>
-                <button type="submit" className={accentButton}>
-                  Send
                 </button>
               </div>
             </form>

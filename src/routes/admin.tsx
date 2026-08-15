@@ -488,85 +488,35 @@ function AdminPage() {
             </p>
           ) : null}
 
-          <ul className="space-y-2">
-            {speakers.map((speaker, index) => {
-              const isLive = speaker.id === state?.current_speaker_id;
-              return (
-                <li
-                  key={speaker.id}
-                  className={`relative overflow-hidden rounded-xl border p-3 transition-all ${
-                    isLive
-                      ? "border-console-accent/50 bg-console-panel shadow-[0_8px_30px_-12px_var(--console-accent)]"
-                      : "border-console-line bg-console-surface hover:border-console-raised"
-                  }`}
-                >
-                  {isLive ? (
-                    <span className="absolute inset-y-0 left-0 w-1 bg-console-accent" />
-                  ) : null}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      {isLive ? (
-                        <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.2em] text-console-accent">
-                          Now speaking
-                        </p>
-                      ) : (
-                        <p className="mb-1 font-console-mono text-[9px] uppercase tracking-[0.2em] text-console-dim">
-                          {String(index + 1).padStart(2, "0")}
-                        </p>
-                      )}
-                      <h3 className="truncate font-sora text-base font-bold leading-tight">
-                        {speaker.name.trim() === "" ? (
-                          <span className="italic text-console-muted">Unnamed</span>
-                        ) : (
-                          speaker.name
-                        )}
-                      </h3>
-                      <p className="mt-1 font-console-mono text-[10px] text-console-muted">
-                        {speaker.duration_minutes} min
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <button
-                        aria-label={`Move ${displayName(speaker.name)} up`}
-                        onClick={() => move(index, -1)}
-                        disabled={index === 0}
-                        className="rounded-md p-1.5 text-xs text-console-muted transition-colors hover:bg-console-raised hover:text-console-fg disabled:pointer-events-none disabled:opacity-30"
-                      >
-                        ↑
-                      </button>
-                      <button
-                        aria-label={`Move ${displayName(speaker.name)} down`}
-                        onClick={() => move(index, 1)}
-                        disabled={index === speakers.length - 1}
-                        className="rounded-md p-1.5 text-xs text-console-muted transition-colors hover:bg-console-raised hover:text-console-fg disabled:pointer-events-none disabled:opacity-30"
-                      >
-                        ↓
-                      </button>
-                    </div>
-                  </div>
-                  <div className="mt-2.5 flex gap-2">
-                    <button
-                      onClick={() => selectSpeaker(speaker)}
-                      disabled={isLive}
-                      className={`flex-1 ${isLive ? accentButton : ghostButton}`}
-                    >
-                      {isLive ? "On stage" : "Set live"}
-                    </button>
-                    <button onClick={() => startEdit(speaker)} className={ghostButton}>
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => remove(speaker)}
-                      aria-label={`Delete ${displayName(speaker.name)}`}
-                      className="rounded-lg border border-console-danger/30 px-3 text-console-danger transition-colors hover:bg-console-danger/15"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis]}
+            onDragEnd={onDragEnd}
+          >
+            <SortableContext
+              items={speakers.map((s) => s.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <ul className="space-y-2">
+                {speakers.map((speaker, index) => (
+                  <SpeakerCard
+                    key={speaker.id}
+                    speaker={speaker}
+                    index={index}
+                    total={speakers.length}
+                    isLive={speaker.id === state?.current_speaker_id}
+                    confirming={confirmingId === speaker.id}
+                    onConfirmChange={setConfirmingId}
+                    onMove={move}
+                    onSelect={selectSpeaker}
+                    onEdit={startEdit}
+                    onRemove={remove}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
         </div>
 
         <div className="flex items-center justify-between border-t border-console-line bg-console-bg px-4 py-3 font-console-mono text-[9px] text-console-muted">

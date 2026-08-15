@@ -469,15 +469,16 @@ function AdminPage() {
 
         <div className="grid flex-1 gap-4 p-4 lg:grid-cols-12 lg:gap-5 lg:p-5">
           <section className="flex flex-col gap-4 lg:col-span-8">
-            <div className="relative w-[288px] h-[162px] overflow-hidden rounded-2xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
-              <StageScreen
-                speaker={current}
-                state={state}
-                now={now}
-                compact
-                showElapsed={displayMode === "elapsed"}
-                thresholds={thresholds}
-              />
+           <div className="relative w-[288px] h-[162px] overflow-hidden rounded-2xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
+              <div style={{ width: 1280, height: 720, transform: "scale(0.225)", transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
+                <StageScreen
+                  speaker={current}
+                  state={state}
+                  now={now}
+                  showElapsed={displayMode === "elapsed"}
+                  thresholds={thresholds}
+                />
+              </div>
               <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2">
                 <span className="rounded-md bg-console-danger px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.2em] text-console-accent-fg">
                   Live feed

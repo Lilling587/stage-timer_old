@@ -159,3 +159,65 @@ export function useAdminPresence() {
 
   return adminCount;
 }
+
+export type DisplayMode = "remaining" | "elapsed";
+
+const DISPLAY_MODE_CHANNEL = "stage-display-mode";
+
+/**
+ * Stage side: listens for the display mode chosen in the control room.
+ * Asks for the current mode on connect so a reloading stage catches up.
+ */
+export function useStageDisplayMode() {
+  const [mode, setMode] = useState<DisplayMode>("remaining");
+
+  useEffect(() => {
+    const channel = supabase.channel(DISPLAY_MODE_CHANNEL);
+    channel
+      .on("broadcast", { event: "set" }, ({ payload }) => {
+        const next = (payload as { mode?: DisplayMode })?.mode;
+        if (next === "remaining" || next === "elapsed") setMode(next);
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.send({ type: "broadcast", event: "request", payload: {} });
+        }
+      });
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return mode;
+}
+
+/**
+ * Control room side: owns the display mode and pushes it to every stage screen.
+ */
+export function useDisplayModeControl() {
+  const [mode, setMode] = useState<DisplayMode>("remaining");
+  const modeRef = useRef<DisplayMode>("remaining");
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  useEffect(() => {
+    const channel = supabase.channel(DISPLAY_MODE_CHANNEL);
+    channelRef.current = channel;
+    channel
+      .on("broadcast", { event: "request" }, () => {
+        void channel.send({ type: "broadcast", event: "set", payload: { mode: modeRef.current } });
+      })
+      .subscribe();
+    return () => {
+      channelRef.current = null;
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const setDisplayMode = useCallback((next: DisplayMode) => {
+    modeRef.current = next;
+    setMode(next);
+    void channelRef.current?.send({ type: "broadcast", event: "set", payload: { mode: next } });
+  }, []);
+
+  return { displayMode: mode, setDisplayMode };
+}

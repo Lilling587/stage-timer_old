@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DEFAULT_ADJUSTMENTS, DEFAULT_THRESHOLDS, useAdjustmentSettings, useThresholdControl } from "@/lib/show";
+import { useState } from "react";
+import {
+  DEFAULT_ADJUSTMENTS,
+  DEFAULT_QUICK_MESSAGES,
+  DEFAULT_THRESHOLDS,
+  useAdjustmentSettings,
+  useQuickMessages,
+  useThresholdControl,
+} from "@/lib/show";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -34,6 +42,15 @@ const accentButton =
 function SettingsPage() {
   const { thresholds, setThresholds } = useThresholdControl();
   const { adjustments, setAdjustments } = useAdjustmentSettings();
+  const { quickMessages, setQuickMessages } = useQuickMessages();
+  const [draft, setDraft] = useState("");
+
+  function addQuickMessage() {
+    const value = draft.trim().slice(0, 200);
+    if (!value) return;
+    setQuickMessages([...quickMessages, value]);
+    setDraft("");
+  }
 
   return (
     <div className="min-h-screen bg-console-bg font-manrope text-console-fg">

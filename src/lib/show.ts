@@ -372,10 +372,10 @@ export function useAdjustmentSettings() {
 
 const QUICK_MESSAGES_STORAGE = "stage-quick-messages";
 export const DEFAULT_QUICK_MESSAGES = [
-  "Please wrap up",
-  "2 minutes left",
-  "Time is up",
-  "Questions?",
+  "Vänligen avrunda",
+  "2 minuter kvar",
+  "Tiden är ute",
+  "Frågor?",
 ];
 
 export function useQuickMessages() {

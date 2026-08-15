@@ -12,11 +12,13 @@ export function StageScreen({
   state,
   now,
   compact = false,
+  showElapsed = false,
 }: {
   speaker: Speaker | null;
   state: TimerState | null;
   now: number;
   compact?: boolean;
+  showElapsed?: boolean;
 }) {
   const message = state?.message ?? null;
   const messageVisible = Boolean(message);
@@ -24,7 +26,8 @@ export function StageScreen({
   const wallClock = new Date(now).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
 
   const total = (speaker?.duration_minutes ?? 0) * 60;
-  const remaining = speaker ? total - elapsedFor(state, now) : 0;
+  const elapsed = elapsedFor(state, now);
+  const remaining = speaker ? total - elapsed : 0;
   const tone = toneFor(remaining);
 
   if (state?.blackout && !compact) {
@@ -51,7 +54,11 @@ export function StageScreen({
           compact ? "text-5xl" : "text-[18vw] leading-[0.9]"
         }`}
       >
-        {showClock ? wallClock : speaker ? formatClock(remaining) : "00:00"}
+        {showClock
+          ? wallClock
+          : speaker
+            ? formatClock(showElapsed ? elapsed : remaining)
+            : "00:00"}
       </p>
 
       {messageVisible && message ? (

@@ -64,7 +64,7 @@ function AdminPage() {
   const { speakers, state, refresh, syncStatus } = useShow();
   const adminCount = useAdminPresence();
   const { displayMode, setDisplayMode } = useDisplayModeControl();
-  const { thresholds, setThresholds } = useThresholdControl();
+  const { thresholds } = useThresholdControl();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
@@ -250,7 +250,7 @@ function AdminPage() {
     <div className="flex min-h-screen w-full flex-col bg-console-bg font-manrope text-console-fg lg:flex-row">
       {/* Sidebar: run of show */}
       <aside className="flex w-full flex-col border-console-line bg-console-surface lg:h-screen lg:w-80 lg:shrink-0 lg:border-r">
-        <div className="flex items-center justify-between border-b border-console-line bg-console-panel px-6 py-5">
+        <div className="flex items-center justify-between border-b border-console-line bg-console-panel px-4 py-3">
           <h2 className="font-sora text-[11px] font-bold uppercase tracking-[0.2em] text-console-muted">
             Run of show
           </h2>
@@ -264,12 +264,12 @@ function AdminPage() {
           ) : null}
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <div className="flex-1 space-y-3 overflow-y-auto p-3">
           <form
             onSubmit={submitSpeaker}
-            className="rounded-xl border border-console-line bg-console-panel p-4"
+            className="rounded-xl border border-console-line bg-console-panel p-3"
           >
-            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-console-dim">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-dim">
               {editingId ? "Edit speaker" : "Add speaker"}
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -300,7 +300,7 @@ function AdminPage() {
                 />
               </div>
             </div>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-2 flex gap-2">
               <button type="submit" className={`flex-1 ${accentButton}`}>
                 {editingId ? "Save changes" : "Add speaker"}
               </button>
@@ -326,13 +326,13 @@ function AdminPage() {
             </p>
           ) : null}
 
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {speakers.map((speaker, index) => {
               const isLive = speaker.id === state?.current_speaker_id;
               return (
                 <li
                   key={speaker.id}
-                  className={`relative overflow-hidden rounded-2xl border p-4 transition-all ${
+                  className={`relative overflow-hidden rounded-xl border p-3 transition-all ${
                     isLive
                       ? "border-console-accent/50 bg-console-panel shadow-[0_8px_30px_-12px_var(--console-accent)]"
                       : "border-console-line bg-console-surface hover:border-console-raised"
@@ -382,7 +382,7 @@ function AdminPage() {
                       </button>
                     </div>
                   </div>
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-2.5 flex gap-2">
                     <button
                       onClick={() => selectSpeaker(speaker)}
                       disabled={isLive}

@@ -51,7 +51,8 @@ function SettingsPage() {
           <h2 className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
             Colour thresholds
           </h2>
-         <div className="flex flex-col gap-1">
+         <div className="flex flex-wrap items-end gap-4">
+            <div className="flex flex-col gap-1">
               <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-muted">Timer colour warnings</span>
               <button
                 type="button"

@@ -15,6 +15,9 @@ type StatusPayload = {
   mmss: string;
   tone: string;
   message: string | null;
+  blackout: boolean;
+  show_clock: boolean;
+  display_mode: string;
   speakers: number;
 };
 
@@ -25,6 +28,9 @@ const COMPANION_VARIABLES = [
   { name: "$(timer:status)", description: "running, paused or stopped" },
   { name: "$(timer:tone)", description: "safe, warn, danger or over — handy for button colours" },
   { name: "$(timer:speaker_position)", description: "Position of the speaker in the list" },
+  { name: "$(timer:blackout)", description: "true while stage is blacked out, false otherwise" },
+  { name: "$(timer:show_clock)", description: "true while showing wall clock, false for countdown" },
+  { name: "$(timer:display_mode)", description: "remaining or elapsed" },
 ];
 
 function variableValue(live: StatusPayload | null, variable: string) {
@@ -42,6 +48,12 @@ function variableValue(live: StatusPayload | null, variable: string) {
       return live.mmss;
     case "$(timer:remaining_seconds)":
       return String(live.remaining_seconds);
+    case "$(timer:blackout)":
+      return String(live.blackout ?? false);
+    case "$(timer:show_clock)":
+      return String(live.show_clock ?? false);
+    case "$(timer:display_mode)":
+      return live.display_mode ?? "remaining";
     default:
       return null;
   }

@@ -9,6 +9,7 @@ import {
   elapsedFor,
   formatClock,
   toneFor,
+  useAdjustmentSettings,
   useAdminPresence,
   useDisplayModeControl,
   useNow,
@@ -65,6 +66,7 @@ function AdminPage() {
   const adminCount = useAdminPresence();
   const { displayMode, setDisplayMode } = useDisplayModeControl();
   const { thresholds } = useThresholdControl();
+  const { adjustments } = useAdjustmentSettings();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
@@ -487,7 +489,7 @@ function AdminPage() {
                   Time adjustments
                 </p>
                 <div className="grid grid-cols-4 gap-2">
-                  {[-5, -1, 1, 5].map((delta) => (
+                  {adjustments.map((delta) => (
                     <button
                       key={delta}
                       onClick={() => adjustTime(delta)}

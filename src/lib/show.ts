@@ -369,4 +369,3 @@ export function useAdjustmentSettings() {
 
   return { adjustments, setAdjustments };
 }
-}

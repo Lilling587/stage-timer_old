@@ -623,11 +623,11 @@ function AdminPage() {
                   setDisplayMode(next);
                   void patchState({ display_mode: next });
                 }}
-                className={`flex-[2] ${displayMode === "elapsed" ? accentButton : ghostButton}`}
+                className={`flex-1 ${displayMode === "elapsed" ? accentButton : ghostButton}`}
               >
                 Timer remaining/elapsed
               </button>
-              <div className="flex flex-[3] items-center justify-between rounded-xl border border-console-line bg-console-surface px-4 py-3">
+              <div className="flex flex-1 items-center justify-between rounded-xl border border-console-line bg-console-surface px-4 py-3">
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
                   Clock mode
                 </span>

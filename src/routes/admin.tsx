@@ -629,6 +629,18 @@ function AdminPage() {
                 />
               </div>
               <div className="grid grid-cols-2 gap-3 border-t border-console-line bg-console-panel p-4">
+                <button type="submit" className={accentButton}>
+                  Send
+                </button>
+                <button
+                  type="button"
+                  onClick={() => patchState({ message: "", message_sent_at: null })}
+                  disabled={!state?.message}
+                  className={ghostButton}
+                >
+                  Clear
+                </button>
+              </div>
                 <button
                   type="button"
                   onClick={() => patchState({ message: "", message_sent_at: null })}

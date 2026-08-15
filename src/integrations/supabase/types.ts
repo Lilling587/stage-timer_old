@@ -42,12 +42,12 @@ export type Database = {
         Row: {
           blackout: boolean
           current_speaker_id: string | null
+          display_mode: string
           elapsed_seconds: number
           id: string
           message: string | null
           message_sent_at: string | null
           revision: number
-          display_mode: string
           show_clock: boolean
           started_at: string | null
           status: string
@@ -56,12 +56,12 @@ export type Database = {
         Insert: {
           blackout?: boolean
           current_speaker_id?: string | null
+          display_mode?: string
           elapsed_seconds?: number
           id?: string
           message?: string | null
           message_sent_at?: string | null
           revision?: number
-          display_mode?: string
           show_clock?: boolean
           started_at?: string | null
           status?: string
@@ -70,12 +70,12 @@ export type Database = {
         Update: {
           blackout?: boolean
           current_speaker_id?: string | null
+          display_mode?: string
           elapsed_seconds?: number
           id?: string
           message?: string | null
           message_sent_at?: string | null
           revision?: number
-          display_mode?: string
           show_clock?: boolean
           started_at?: string | null
           status?: string

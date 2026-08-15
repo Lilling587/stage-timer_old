@@ -148,6 +148,8 @@ async function handle(request: Request, action: string) {
       mmss: formatClock(remaining),
       tone: toneFor(remaining),
       message: merged.message,
+      blackout: merged.blackout ?? false,
+      show_clock: merged.show_clock ?? false,
       speakers: speakers.length,
     };
   }
@@ -279,6 +281,21 @@ async function handle(request: Request, action: string) {
 
     case "clear-message": {
       const values = { message: null, message_sent_at: null };
+      const error = await patch(values);
+      if (error) return json({ error }, 500);
+      return json(statusPayload(values as Partial<StateRow>));
+    }
+
+    default:
+      case "blackout": {
+      const values = { blackout: !(state.blackout ?? false) };
+      const error = await patch(values);
+      if (error) return json({ error }, 500);
+      return json(statusPayload(values as Partial<StateRow>));
+    }
+
+    case "clock": {
+      const values = { show_clock: !(state.show_clock ?? false) };
       const error = await patch(values);
       if (error) return json({ error }, 500);
       return json(statusPayload(values as Partial<StateRow>));

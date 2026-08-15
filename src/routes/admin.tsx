@@ -21,16 +21,16 @@ import {
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Run of show — Conference speaker timer" },
+      { title: "Run of show — Stage Timer" },
       {
         name: "description",
         content:
           "Manage speakers, control the countdown, and send messages to the stage screen in real time.",
       },
-      { property: "og:title", content: "Run of show — Conference speaker timer" },
+      { property: "og:title", content: "Run of show — Stage Timer" },
       {
         property: "og:description",
-        content: "Admin control room for the conference speaker timer.",
+        content: "Admin control room for the Stage Timer.",
       },
     ],
   }),

@@ -14,6 +14,7 @@ type StateRow = {
   message_sent_at: string | null;
   blackout: boolean;
   show_clock: boolean;
+  display_mode: string;
 };
 
 const minutesSchema = z.coerce.number().finite().min(-600).max(600);
@@ -150,6 +151,7 @@ async function handle(request: Request, action: string) {
       message: merged.message,
       blackout: merged.blackout ?? false,
       show_clock: merged.show_clock ?? false,
+      display_mode: merged.display_mode ?? "remaining",
       speakers: speakers.length,
     };
   }
@@ -301,6 +303,15 @@ async function handle(request: Request, action: string) {
       return json(statusPayload(values as Partial<StateRow>));
     }
 
+    case "toggle-display": {
+      const current_mode = state.display_mode ?? "remaining";
+      const values = { display_mode: current_mode === "elapsed" ? "remaining" : "elapsed" };
+      const error = await patch(values);
+      if (error) return json({ error }, 500);
+      return json(statusPayload(values as Partial<StateRow>));
+    }
+
+    default:
     default:
       return json({ error: `Unknown action "${action}"` }, 404);
   }

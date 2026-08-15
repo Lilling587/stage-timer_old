@@ -463,7 +463,7 @@ function AdminPage() {
                 <p className="mb-4 text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-dim">
                   Time adjustments
                 </p>
-                <div className="grid grid-cols-2 gap-2 xs:grid-cols-4 sm:grid-cols-4 sm:gap-3">
+                <div className="grid grid-cols-4 gap-2 sm:gap-3">
                   {[-5, -1, 1, 5].map((delta) => (
                     <button
                       key={delta}

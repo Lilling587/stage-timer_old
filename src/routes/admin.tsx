@@ -474,7 +474,7 @@ function AdminPage() {
                 </label>
                 <input
                   id="speaker-duration"
-                  className={fieldClass}
+                  className={`${fieldClass} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                   type="number"
                   min={1}
                   max={600}

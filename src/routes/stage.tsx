@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Maximize2, Minimize2, Wifi, WifiOff } from "lucide-react";
 import { StageScreen } from "@/components/StageScreen";
-import { useNow, useShow, useStageDisplayMode, useStageThresholds } from "@/lib/show";
+import { useNow, useShow, useStageThresholds } from "@/lib/show";
 
 export const Route = createFileRoute("/stage")({
   head: () => ({
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/stage")({
 
 function StagePage() {
   const { speakers, state, syncStatus } = useShow();
-  const displayMode = useStageDisplayMode();
+  const displayMode = (state?.display_mode as "remaining" | "elapsed") ?? "remaining";
   const thresholds = useStageThresholds();
   const now = useNow(true);
   const speaker = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;

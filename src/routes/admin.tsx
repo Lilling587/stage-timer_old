@@ -12,6 +12,7 @@ import {
   useDisplayModeControl,
   useNow,
   useShow,
+  useThresholdControl,
   type Speaker,
 } from "@/lib/show";
 
@@ -62,6 +63,7 @@ function AdminPage() {
   const { speakers, state, refresh, syncStatus } = useShow();
   const adminCount = useAdminPresence();
   const { displayMode, setDisplayMode } = useDisplayModeControl();
+  const { thresholds, setThresholds } = useThresholdControl();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");

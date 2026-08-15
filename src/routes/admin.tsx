@@ -642,7 +642,7 @@ function AdminPage() {
                 onClick={() =>
                   setDisplayMode(displayMode === "elapsed" ? "remaining" : "elapsed")
                 }
-                className={displayMode === "elapsed" ? accentButton : ghostButton}
+                className={`w-full ${displayMode === "elapsed" ? accentButton : ghostButton}`}
               >
                 Timer remaining/elapsed
               </button>

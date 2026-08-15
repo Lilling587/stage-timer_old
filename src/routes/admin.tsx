@@ -614,34 +614,7 @@ function AdminPage() {
               </div>
             </form>
 
-            <div className="mt-6 space-y-4 lg:mt-8">
-              <div className="flex items-center justify-between rounded-2xl border border-console-line bg-console-surface p-5">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
-                    Clock display
-                  </span>
-                  <span className="text-[9px] text-console-dim">
-                    Show the time of day instead of the timer
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={state?.show_clock ?? false}
-                  aria-label="Show clock instead of timer"
-                  onClick={() => patchState({ show_clock: !(state?.show_clock ?? false) })}
-                  className={`relative h-6 w-11 rounded-full transition-colors ${
-                    state?.show_clock ? "bg-console-accent" : "bg-console-raised"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
-                      state?.show_clock ? "right-1" : "left-1"
-                    }`}
-                  />
-                </button>
-              </div>
-
+            <div className="mt-4">
               <button
                 type="button"
                 aria-pressed={displayMode === "elapsed"}
@@ -654,74 +627,6 @@ function AdminPage() {
               >
                 Timer remaining/elapsed
               </button>
-
-              <div className="rounded-2xl border border-console-line bg-console-surface p-5">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
-                  Colour thresholds
-                </span>
-                <p className="mt-1 text-[9px] text-console-dim">
-                  Minutes left when the stage timer turns yellow, then red
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setThresholds({ ...thresholds, enabled: !thresholds.enabled })}
-                  aria-pressed={!thresholds.enabled}
-                  className={`mt-3 w-full ${thresholds.enabled ? ghostButton : accentButton}`}
-                >
-                  {thresholds.enabled ? "Colours on" : "Always green"}
-                </button>
-                <div className={`mt-4 grid grid-cols-2 gap-3 ${thresholds.enabled ? "" : "opacity-40"}`}>
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-accent">
-                      Yellow at
-                    </span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={120}
-                      step={0.5}
-                      disabled={!thresholds.enabled}
-                      value={thresholds.warnMinutes}
-                      onChange={(event) =>
-                        setThresholds({
-                          ...thresholds,
-                          warnMinutes: Number(event.target.value),
-                        })
-                      }
-                      className={fieldClass}
-                      aria-label="Minutes remaining when the timer turns yellow"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-danger">
-                      Red at
-                    </span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={120}
-                      step={0.5}
-                      disabled={!thresholds.enabled}
-                      value={thresholds.dangerMinutes}
-                      onChange={(event) =>
-                        setThresholds({
-                          ...thresholds,
-                          dangerMinutes: Number(event.target.value),
-                        })
-                      }
-                      className={fieldClass}
-                      aria-label="Minutes remaining when the timer turns red"
-                    />
-                  </label>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setThresholds(DEFAULT_THRESHOLDS)}
-                  className={`mt-3 w-full ${ghostButton}`}
-                >
-                  Reset to 5 / 2 min
-                </button>
-              </div>
             </div>
           </section>
         </div>

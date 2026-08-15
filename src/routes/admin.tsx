@@ -519,17 +519,20 @@ function AdminPage() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => patchState({ blackout: !(state?.blackout ?? false) })}
-              className={`mt-2 w-full rounded-2xl border py-5 text-[11px] font-extrabold uppercase tracking-[0.3em] transition-all active:scale-[0.98] ${
-                state?.blackout
-                  ? "blackout-blink border-console-danger bg-console-danger text-console-accent-fg"
-                  : "border-console-danger/40 bg-console-danger/10 text-console-danger hover:bg-console-danger hover:text-console-accent-fg"
-              }`}
-            >
-              {state?.blackout ? "Blackout on — restore stage" : "Blackout stage"}
-            </button>
+            <div className="mt-2 grid gap-6 sm:grid-cols-2">
+              <div className="hidden sm:block" />
+              <button
+                type="button"
+                onClick={() => patchState({ blackout: !(state?.blackout ?? false) })}
+                className={`w-full rounded-xl border py-3 text-[10px] font-extrabold uppercase tracking-[0.25em] transition-all active:scale-[0.98] ${
+                  state?.blackout
+                    ? "blackout-blink border-console-danger bg-console-danger text-console-accent-fg"
+                    : "border-console-danger/40 bg-console-danger/10 text-console-danger hover:bg-console-danger hover:text-console-accent-fg"
+                }`}
+              >
+                {state?.blackout ? "Blackout on — restore stage" : "Blackout stage"}
+              </button>
+            </div>
           </section>
 
           <section className="flex flex-col lg:col-span-4">

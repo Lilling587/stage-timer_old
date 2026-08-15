@@ -232,6 +232,11 @@ function AdminPage() {
   const [duration, setDuration] = useState("20");
   const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const current = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;
   const currentIndex = current ? speakers.findIndex((s) => s.id === current.id) : -1;

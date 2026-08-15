@@ -657,7 +657,15 @@ function AdminPage() {
                 <p className="mt-1 text-[9px] text-console-dim">
                   Minutes left when the stage timer turns yellow, then red
                 </p>
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setThresholds({ ...thresholds, enabled: !thresholds.enabled })}
+                  aria-pressed={!thresholds.enabled}
+                  className={`mt-3 w-full ${thresholds.enabled ? ghostButton : accentButton}`}
+                >
+                  {thresholds.enabled ? "Colours on" : "Always green"}
+                </button>
+                <div className={`mt-4 grid grid-cols-2 gap-3 ${thresholds.enabled ? "" : "opacity-40"}`}>
                   <label className="flex flex-col gap-1.5">
                     <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-accent">
                       Yellow at
@@ -667,6 +675,7 @@ function AdminPage() {
                       min={0}
                       max={120}
                       step={0.5}
+                      disabled={!thresholds.enabled}
                       value={thresholds.warnMinutes}
                       onChange={(event) =>
                         setThresholds({
@@ -687,6 +696,7 @@ function AdminPage() {
                       min={0}
                       max={120}
                       step={0.5}
+                      disabled={!thresholds.enabled}
                       value={thresholds.dangerMinutes}
                       onChange={(event) =>
                         setThresholds({

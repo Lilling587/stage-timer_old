@@ -469,7 +469,7 @@ function AdminPage() {
 
         <div className="grid flex-1 gap-4 p-4 lg:grid-cols-12 lg:gap-5 lg:p-5">
           <section className="flex flex-col gap-4 lg:col-span-8">
-            <div className="relative h-[140px] w-full overflow-hidden rounded-2xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
+            <div className="relative w-[288px] h-[162px] overflow-hidden rounded-2xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
               <StageScreen
                 speaker={current}
                 state={state}

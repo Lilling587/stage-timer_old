@@ -587,14 +587,24 @@ function AdminPage() {
               </a>
             </nav>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-console-dim">
-              Realtime sync
-            </span>
-            <span className="flex items-center gap-2 font-console-mono text-[11px] font-bold text-console-accent">
-              {syncLabel}
-              <span className={`h-2 w-2 rounded-full ${syncDot}`} />
-            </span>
+         <div className="flex items-center gap-4">
+            <div className="flex flex-col items-end">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-console-dim">
+                Realtime sync
+              </span>
+              <span className="flex items-center gap-2 font-console-mono text-[11px] font-bold text-console-accent">
+                {syncLabel}
+                <span className={`h-2 w-2 rounded-full ${syncDot}`} />
+              </span>
+            </div>
+            
+              href="/stage"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-lg bg-console-accent px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-accent-fg transition-all hover:bg-console-accent-hover active:scale-95"
+            >
+              Stage view ↗
+            </a>
           </div>
         </header>
 

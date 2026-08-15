@@ -126,11 +126,27 @@ export function useNow(active: boolean) {
   return now;
 }
 
-export function toneFor(remaining: number) {
+export type Thresholds = { warnMinutes: number; dangerMinutes: number };
+
+export const DEFAULT_THRESHOLDS: Thresholds = { warnMinutes: 5, dangerMinutes: 2 };
+
+export function toneFor(remaining: number, thresholds: Thresholds = DEFAULT_THRESHOLDS) {
   if (remaining <= 0) return "over" as const;
-  if (remaining < 120) return "danger" as const;
-  if (remaining < 300) return "warn" as const;
+  if (remaining < thresholds.dangerMinutes * 60) return "danger" as const;
+  if (remaining < thresholds.warnMinutes * 60) return "warn" as const;
   return "safe" as const;
+}
+
+function sanitizeThresholds(value: unknown): Thresholds | null {
+  const raw = value as Partial<Thresholds> | undefined;
+  if (!raw) return null;
+  const warn = Number(raw.warnMinutes);
+  const danger = Number(raw.dangerMinutes);
+  if (!Number.isFinite(warn) || !Number.isFinite(danger)) return null;
+  const clamp = (n: number) => Math.min(120, Math.max(0, Math.round(n * 10) / 10));
+  const safeDanger = clamp(danger);
+  const safeWarn = Math.max(clamp(warn), safeDanger);
+  return { warnMinutes: safeWarn, dangerMinutes: safeDanger };
 }
 
 /**

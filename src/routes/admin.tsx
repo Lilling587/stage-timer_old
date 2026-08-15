@@ -508,7 +508,11 @@ function AdminPage() {
                   </p>
                   {current ? (
                     <span
-                      aria-label="Time remaining for the speaker on stage"
+                      aria-label={
+                        displayMode === "elapsed"
+                          ? "Time elapsed for the speaker on stage"
+                          : "Time remaining for the speaker on stage"
+                      }
                       className={`shrink-0 font-console-mono text-lg tabular-nums ${
                         {
                           over: "text-console-danger",
@@ -518,7 +522,11 @@ function AdminPage() {
                         }[toneFor(current.duration_minutes * 60 - elapsedFor(state, now))]
                       }`}
                     >
-                      {formatClock(current.duration_minutes * 60 - elapsedFor(state, now))}
+                      {formatClock(
+                        displayMode === "elapsed"
+                          ? elapsedFor(state, now)
+                          : current.duration_minutes * 60 - elapsedFor(state, now),
+                      )}
                     </span>
                   ) : null}
                 </div>

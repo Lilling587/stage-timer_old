@@ -614,7 +614,7 @@ function AdminPage() {
               </div>
             </form>
 
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col gap-3">
               <button
                 type="button"
                 aria-pressed={displayMode === "elapsed"}
@@ -627,6 +627,27 @@ function AdminPage() {
               >
                 Timer remaining/elapsed
               </button>
+              <div className="flex items-center justify-between rounded-xl border border-console-line bg-console-surface px-4 py-3">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
+                  Clock mode
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={state?.show_clock ?? false}
+                  aria-label="Show clock instead of timer"
+                  onClick={() => patchState({ show_clock: !(state?.show_clock ?? false) })}
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                    state?.show_clock ? "bg-console-accent" : "bg-console-raised"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
+                      state?.show_clock ? "right-1" : "left-1"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           </section>
         </div>

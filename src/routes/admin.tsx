@@ -491,21 +491,7 @@ function AdminPage() {
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-                  <p className="min-w-0 truncate text-[11px] text-console-muted">
-                    {current ? (
-                      <>
-                        On stage:{" "}
-                        {current.name.trim() === "" ? (
-                          <em className="italic">Unnamed</em>
-                        ) : (
-                          current.name
-                        )}
-                      </>
-                    ) : (
-                      "No speaker on stage yet"
-                    )}
-                  </p>
+                <div className="mt-4 flex items-center justify-end gap-3">
                   {current ? (
                     <span
                       aria-label={

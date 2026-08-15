@@ -369,3 +369,35 @@ export function useAdjustmentSettings() {
 
   return { adjustments, setAdjustments };
 }
+
+const QUICK_MESSAGES_STORAGE = "stage-quick-messages";
+export const DEFAULT_QUICK_MESSAGES = [
+  "Please wrap up",
+  "2 minutes left",
+  "Time is up",
+  "Questions?",
+];
+
+export function useQuickMessages() {
+  const [quickMessages, setQuickMessagesState] = useState<string[]>(() => {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(QUICK_MESSAGES_STORAGE) ?? "null");
+      if (Array.isArray(stored) && stored.every((m) => typeof m === "string"))
+        return stored as string[];
+    } catch {
+      // ignore unreadable storage
+    }
+    return DEFAULT_QUICK_MESSAGES;
+  });
+
+  const setQuickMessages = useCallback((next: string[]) => {
+    setQuickMessagesState(next);
+    try {
+      window.localStorage.setItem(QUICK_MESSAGES_STORAGE, JSON.stringify(next));
+    } catch {
+      // ignore unwritable storage
+    }
+  }, []);
+
+  return { quickMessages, setQuickMessages };
+}

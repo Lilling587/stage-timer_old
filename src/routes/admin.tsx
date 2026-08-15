@@ -13,6 +13,7 @@ import {
   useAdminPresence,
   useDisplayModeControl,
   useNow,
+  useQuickMessages,
   useShow,
   useThresholdControl,
   type Speaker,
@@ -67,6 +68,7 @@ function AdminPage() {
   const { displayMode, setDisplayMode } = useDisplayModeControl();
   const { thresholds } = useThresholdControl();
   const { adjustments } = useAdjustmentSettings();
+  const { quickMessages } = useQuickMessages();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
@@ -591,6 +593,30 @@ function AdminPage() {
                   <div className="mb-3 rounded-xl border border-console-accent/30 bg-console-accent/10 px-3 py-2 text-xs text-console-accent">
                     <span className="font-bold uppercase tracking-[0.2em]">Live on stage</span>
                     <p className="mt-1 italic text-console-fg">"{state.message}"</p>
+                  </div>
+                ) : null}
+                {quickMessages.length > 0 ? (
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {quickMessages.map((quick, i) => {
+                      const active = state?.message === quick;
+                      return (
+                        <button
+                          key={`${quick}-${i}`}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() =>
+                            patchState({ message: quick, message_sent_at: new Date().toISOString() })
+                          }
+                          className={`max-w-[14rem] truncate rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] transition-all active:scale-95 ${
+                            active
+                              ? "bg-console-accent text-console-accent-fg hover:bg-console-accent-hover"
+                              : "border border-console-line text-console-muted hover:bg-console-raised hover:text-console-fg"
+                          }`}
+                        >
+                          {quick}
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : null}
                 <textarea

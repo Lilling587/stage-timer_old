@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DEFAULT_ADJUSTMENTS, DEFAULT_THRESHOLDS, useAdjustmentSettings, useThresholdControl } from "@/lib/show";
+import { useState } from "react";
+import {
+  DEFAULT_ADJUSTMENTS,
+  DEFAULT_QUICK_MESSAGES,
+  DEFAULT_THRESHOLDS,
+  useAdjustmentSettings,
+  useQuickMessages,
+  useThresholdControl,
+} from "@/lib/show";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -34,6 +42,15 @@ const accentButton =
 function SettingsPage() {
   const { thresholds, setThresholds } = useThresholdControl();
   const { adjustments, setAdjustments } = useAdjustmentSettings();
+  const { quickMessages, setQuickMessages } = useQuickMessages();
+  const [draft, setDraft] = useState("");
+
+  function addQuickMessage() {
+    const value = draft.trim().slice(0, 200);
+    if (!value) return;
+    setQuickMessages([...quickMessages, value]);
+    setDraft("");
+  }
 
   return (
     <div className="min-h-screen bg-console-bg font-manrope text-console-fg">
@@ -176,6 +193,70 @@ function SettingsPage() {
                 />
               </label>
             ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-console-line bg-console-surface p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
+              Quick messages
+            </h2>
+            <button
+              type="button"
+              onClick={() => setQuickMessages(DEFAULT_QUICK_MESSAGES)}
+              className={ghostButton}
+            >
+              Reset
+            </button>
+          </div>
+          <p className="mb-3 text-[11px] text-console-dim">
+            One-tap messages shown above the message box in the command page.
+          </p>
+          <ul className="mb-3 flex flex-col gap-2">
+            {quickMessages.length === 0 ? (
+              <li className="text-[11px] italic text-console-dim">No quick messages yet.</li>
+            ) : (
+              quickMessages.map((msg, i) => (
+                <li
+                  key={`${msg}-${i}`}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-console-line bg-console-bg px-3 py-2"
+                >
+                  <span className="truncate text-sm text-console-fg">{msg}</span>
+                  <button
+                    type="button"
+                    aria-label={`Delete quick message ${msg}`}
+                    onClick={() => setQuickMessages(quickMessages.filter((_, idx) => idx !== i))}
+                    className="shrink-0 rounded-md px-2 py-0.5 text-sm text-console-muted transition-colors hover:bg-console-raised hover:text-console-danger"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              maxLength={200}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addQuickMessage();
+                }
+              }}
+              aria-label="New quick message"
+              className={fieldClass}
+            />
+            <button
+              type="button"
+              onClick={addQuickMessage}
+              disabled={!draft.trim()}
+              className={`shrink-0 ${accentButton}`}
+            >
+              Add
+            </button>
           </div>
         </section>
 

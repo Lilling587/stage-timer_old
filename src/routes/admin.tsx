@@ -636,34 +636,16 @@ function AdminPage() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between rounded-2xl border border-console-line bg-console-surface p-5">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
-                    Timer readout
-                  </span>
-                  <span className="text-[9px] text-console-dim">
-                    Show elapsed time instead of time remaining
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={displayMode === "elapsed"}
-                  aria-label="Show elapsed time instead of remaining time"
-                  onClick={() =>
-                    setDisplayMode(displayMode === "elapsed" ? "remaining" : "elapsed")
-                  }
-                  className={`relative h-6 w-11 rounded-full transition-colors ${
-                    displayMode === "elapsed" ? "bg-console-accent" : "bg-console-raised"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
-                      displayMode === "elapsed" ? "right-1" : "left-1"
-                    }`}
-                  />
-                </button>
-              </div>
+              <button
+                type="button"
+                aria-pressed={displayMode === "elapsed"}
+                onClick={() =>
+                  setDisplayMode(displayMode === "elapsed" ? "remaining" : "elapsed")
+                }
+                className={displayMode === "elapsed" ? accentButton : ghostButton}
+              >
+                Timer remaining/elapsed
+              </button>
             </div>
           </section>
         </div>

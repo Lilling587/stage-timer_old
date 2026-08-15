@@ -579,14 +579,14 @@ function AdminPage() {
               onSubmit={sendMessage}
               className="flex flex-1 flex-col overflow-hidden rounded-3xl border border-console-line bg-console-surface"
             >
-              <div className="border-b border-console-line bg-console-panel px-6 py-5">
+              <div className="border-b border-console-line bg-console-panel px-4 py-3">
                 <h2 className="font-sora text-[11px] font-extrabold uppercase tracking-[0.3em] text-console-muted">
                   Stage messaging
                 </h2>
               </div>
-              <div className="flex-1 p-6">
+              <div className="flex-1 p-4">
                 {state?.message ? (
-                  <div className="mb-4 rounded-xl border border-console-accent/30 bg-console-accent/10 px-4 py-3 text-xs text-console-accent">
+                  <div className="mb-3 rounded-xl border border-console-accent/30 bg-console-accent/10 px-3 py-2 text-xs text-console-accent">
                     <span className="font-bold uppercase tracking-[0.2em]">Live on stage</span>
                     <p className="mt-1 italic text-console-fg">"{state.message}"</p>
                   </div>
@@ -596,10 +596,10 @@ function AdminPage() {
                   maxLength={200}
                   onChange={(e) => setMessage(e.target.value)}
                   aria-label="Message to stage"
-                  className="h-32 w-full resize-none rounded-2xl border border-console-line bg-console-bg p-5 text-sm leading-relaxed text-console-fg outline-none transition-colors placeholder:text-console-dim focus:border-console-accent lg:h-full lg:min-h-32"
+                  className="h-28 w-full resize-none rounded-xl border border-console-line bg-console-bg p-4 text-sm leading-relaxed text-console-fg outline-none transition-colors placeholder:text-console-dim focus:border-console-accent lg:h-full lg:min-h-24"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4 border-t border-console-line bg-console-panel p-6">
+              <div className="grid grid-cols-2 gap-3 border-t border-console-line bg-console-panel p-4">
                 <button
                   type="button"
                   onClick={() => patchState({ message: "", message_sent_at: null })}

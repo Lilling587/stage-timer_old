@@ -40,8 +40,14 @@ function SettingsPage() {
   async function patchState(patch: Record<string, unknown>) {
     try {
       const result = (await adminAction({
-        data: { type: "patchState", patch: patch as never, expected_revision: state?.revision },
-      } as never)) as { ok: boolean; conflict?: boolean } | undefined;
+        data: {
+          action: {
+            type: "patchState",
+            patch: patch as never,
+            expected_revision: state?.revision,
+          },
+        },
+      })) as { ok: boolean; conflict?: boolean } | undefined;
       if (result && result.conflict) {
         await refresh();
         toast.warning("Another admin just changed the stage. We refreshed to the latest state.");

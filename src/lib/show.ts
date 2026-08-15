@@ -342,3 +342,31 @@ export function useThresholdControl() {
 
   return { thresholds, setThresholds: updateThresholds };
 }
+
+const ADJUSTMENTS_STORAGE = "stage-time-adjustments";
+export const DEFAULT_ADJUSTMENTS = [-5, -1, 1, 5];
+
+export function useAdjustmentSettings() {
+  const [adjustments, setAdjustmentsState] = useState<number[]>(() => {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem(ADJUSTMENTS_STORAGE) ?? "null");
+      if (Array.isArray(stored) && stored.length === 4 && stored.every(Number.isFinite))
+        return stored as number[];
+    } catch {
+      // ignore
+    }
+    return DEFAULT_ADJUSTMENTS;
+  });
+
+  const setAdjustments = useCallback((next: number[]) => {
+    setAdjustmentsState(next);
+    try {
+      window.localStorage.setItem(ADJUSTMENTS_STORAGE, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  return { adjustments, setAdjustments };
+}
+}

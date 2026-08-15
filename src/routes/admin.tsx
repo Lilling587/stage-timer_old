@@ -505,8 +505,8 @@ function AdminPage() {
                         {
                           over: "text-console-danger",
                           danger: "text-console-danger",
-                          warn: "text-console-warn",
-                          safe: "text-console-accent",
+                          warn: "text-console-accent",
+                          safe: "text-console-ok",
                         }[toneFor(current.duration_minutes * 60 - elapsedFor(state, now))]
                       }`}
                     >

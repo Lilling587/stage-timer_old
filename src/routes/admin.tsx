@@ -508,6 +508,7 @@ function AdminPage() {
                           warn: "text-console-accent",
                           safe: "text-console-ok",
                         }[toneFor(current.duration_minutes * 60 - elapsedFor(state, now))]
+                        // thresholds applied below
                       }`}
                     >
                       {formatClock(

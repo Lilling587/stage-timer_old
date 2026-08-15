@@ -420,16 +420,16 @@ function AdminPage() {
 
       {/* Main console */}
       <main className="flex min-w-0 flex-1 flex-col lg:h-screen lg:overflow-y-auto">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-console-line bg-console-surface/80 px-6 py-4 lg:px-8">
-          <div className="flex flex-wrap items-center gap-6">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-console-line bg-console-surface/80 px-4 py-2.5 lg:px-6">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-console-accent font-sora text-lg font-bold text-console-accent-fg">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-console-accent font-sora text-base font-bold text-console-accent-fg">
                 C
               </span>
-              <h1 className="font-sora text-xl font-extrabold uppercase tracking-tight">Command</h1>
+              <h1 className="font-sora text-lg font-extrabold uppercase tracking-tight">Command</h1>
             </div>
-            <span className="hidden h-6 w-px bg-console-line sm:block" />
-            <nav className="flex gap-6">
+            <span className="hidden h-5 w-px bg-console-line sm:block" />
+            <nav className="flex gap-4">
               <a
                 href="/companion"
                 className="text-[10px] font-bold uppercase tracking-[0.2em] text-console-muted transition-colors hover:text-console-fg"
@@ -463,9 +463,9 @@ function AdminPage() {
           </div>
         </header>
 
-        <div className="grid flex-1 gap-6 p-6 lg:grid-cols-12 lg:gap-8 lg:p-8">
-          <section className="flex flex-col gap-6 lg:col-span-8 lg:gap-8">
-            <div className="relative h-[180px] w-full overflow-hidden rounded-3xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
+        <div className="grid flex-1 gap-4 p-4 lg:grid-cols-12 lg:gap-5 lg:p-5">
+          <section className="flex flex-col gap-4 lg:col-span-8">
+            <div className="relative h-[140px] w-full overflow-hidden rounded-2xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
               <StageScreen
                 speaker={current}
                 state={state}
@@ -474,31 +474,31 @@ function AdminPage() {
                 showElapsed={displayMode === "elapsed"}
                 thresholds={thresholds}
               />
-              <div className="pointer-events-none absolute left-6 top-6 flex items-center gap-2">
-                <span className="rounded-md bg-console-danger px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.2em] text-console-accent-fg">
+              <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2">
+                <span className="rounded-md bg-console-danger px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.2em] text-console-accent-fg">
                   Live feed
                 </span>
               </div>
             </div>
 
-            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
-              <div className="rounded-2xl border border-console-line bg-console-surface p-4 sm:p-6">
-                <p className="mb-4 text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-dim">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-console-line bg-console-surface p-4">
+                <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-dim">
                   Time adjustments
                 </p>
-                <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                <div className="grid grid-cols-4 gap-2">
                   {[-5, -1, 1, 5].map((delta) => (
                     <button
                       key={delta}
                       onClick={() => adjustTime(delta)}
                       disabled={!current}
-                      className="rounded-xl border border-console-line bg-console-bg py-3 font-console-mono text-sm text-console-accent transition-all hover:border-console-accent/50 hover:bg-console-panel active:scale-95 disabled:pointer-events-none disabled:opacity-40 sm:py-3.5"
+                      className="rounded-xl border border-console-line bg-console-bg py-2.5 font-console-mono text-sm text-console-accent transition-all hover:border-console-accent/50 hover:bg-console-panel active:scale-95 disabled:pointer-events-none disabled:opacity-40"
                     >
                       {delta > 0 ? `+${delta}m` : `${delta}m`}
                     </button>
                   ))}
                 </div>
-                <div className="mt-4 flex items-center justify-end gap-3">
+                <div className="mt-3 flex items-center justify-end gap-3">
                   {current ? (
                     <span
                       aria-label={
@@ -530,24 +530,24 @@ function AdminPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col justify-center rounded-2xl border border-console-line bg-console-surface p-4 sm:p-6">
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="flex flex-col justify-center rounded-2xl border border-console-line bg-console-surface p-4">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={start}
                     disabled={state?.status === "running"}
-                    className="min-w-0 truncate rounded-xl bg-console-accent py-4 text-xs font-bold uppercase tracking-[0.15em] text-console-accent-fg shadow-[0_10px_25px_-10px_var(--console-accent)] transition-all hover:bg-console-accent-hover active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-40 sm:py-5 sm:text-sm sm:tracking-[0.2em]"
+                    className="min-w-0 truncate rounded-xl bg-console-accent py-3 text-xs font-bold uppercase tracking-[0.15em] text-console-accent-fg shadow-[0_10px_25px_-10px_var(--console-accent)] transition-all hover:bg-console-accent-hover active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-40 sm:text-sm sm:tracking-[0.2em]"
                   >
                     Start
                   </button>
                   <button
                     onClick={pause}
                     disabled={state?.status !== "running"}
-                    className="min-w-0 truncate rounded-xl bg-console-raised py-4 text-xs font-bold uppercase tracking-[0.15em] text-console-fg transition-all hover:bg-console-line active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-40 sm:py-5 sm:text-sm sm:tracking-[0.2em]"
+                    className="min-w-0 truncate rounded-xl bg-console-raised py-3 text-xs font-bold uppercase tracking-[0.15em] text-console-fg transition-all hover:bg-console-line active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-40 sm:text-sm sm:tracking-[0.2em]"
                   >
                     Pause
                   </button>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-3 sm:mt-4 sm:gap-4">
+                <div className="mt-3 grid grid-cols-2 gap-3">
                   <button onClick={reset} className={`min-w-0 truncate ${ghostButton}`}>
                     Reset timer
                   </button>
@@ -558,12 +558,12 @@ function AdminPage() {
               </div>
             </div>
 
-            <div className="mt-2 grid gap-4 sm:grid-cols-2 sm:gap-6">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="hidden sm:block" />
               <button
                 type="button"
                 onClick={() => patchState({ blackout: !(state?.blackout ?? false) })}
-                className={`w-full truncate rounded-xl border px-3 py-3 text-[10px] font-extrabold uppercase tracking-[0.2em] transition-all active:scale-[0.98] sm:tracking-[0.25em] ${
+                className={`w-full truncate rounded-xl border px-3 py-2.5 text-[10px] font-extrabold uppercase tracking-[0.2em] transition-all active:scale-[0.98] ${
                   state?.blackout
                     ? "blackout-blink border-console-danger bg-console-danger text-console-accent-fg"
                     : "border-console-danger/40 bg-console-danger/10 text-console-danger hover:bg-console-danger hover:text-console-accent-fg"

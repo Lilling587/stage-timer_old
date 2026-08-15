@@ -314,6 +314,22 @@ function AdminPage() {
     await run({ type: "updateSpeaker", id: b.id, position: a.position });
   }
 
+  async function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = speakers.findIndex((s) => s.id === active.id);
+    const to = speakers.findIndex((s) => s.id === over.id);
+    if (from === -1 || to === -1) return;
+    const ordered = arrayMove(speakers, from, to);
+    const positions = speakers.map((s) => s.position).sort((x, y) => x - y);
+    for (let i = 0; i < ordered.length; i += 1) {
+      const speaker = ordered[i]!;
+      const position = positions[i]!;
+      if (speaker.position === position) continue;
+      await run({ type: "updateSpeaker", id: speaker.id, position });
+    }
+  }
+
   async function remove(speaker: Speaker) {
     const ok = await run({ type: "deleteSpeaker", id: speaker.id });
     if (!ok) return;

@@ -659,18 +659,6 @@ function AdminPage() {
                   Clear
                 </button>
               </div>
-                <button
-                  type="button"
-                  onClick={() => patchState({ message: "", message_sent_at: null })}
-                  disabled={!state?.message}
-                  className={ghostButton}
-                >
-                  Clear
-                </button>
-                <button type="submit" className={accentButton}>
-                  Send
-                </button>
-              </div>
             </form>
 
             <div className="mt-4 flex flex-row gap-3">

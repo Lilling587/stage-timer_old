@@ -483,20 +483,37 @@ function AdminPage() {
                     </button>
                   ))}
                 </div>
-                <p className="mt-4 truncate text-[11px] text-console-muted">
+                <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                  <p className="min-w-0 truncate text-[11px] text-console-muted">
+                    {current ? (
+                      <>
+                        On stage:{" "}
+                        {current.name.trim() === "" ? (
+                          <em className="italic">Unnamed</em>
+                        ) : (
+                          current.name
+                        )}
+                      </>
+                    ) : (
+                      "No speaker on stage yet"
+                    )}
+                  </p>
                   {current ? (
-                    <>
-                      On stage:{" "}
-                      {current.name.trim() === "" ? (
-                        <em className="italic">Unnamed</em>
-                      ) : (
-                        current.name
-                      )}
-                    </>
-                  ) : (
-                    "No speaker on stage yet"
-                  )}
-                </p>
+                    <span
+                      aria-label="Time remaining for the speaker on stage"
+                      className={`shrink-0 font-console-mono text-lg tabular-nums ${
+                        {
+                          over: "text-console-danger",
+                          danger: "text-console-danger",
+                          warn: "text-console-warn",
+                          safe: "text-console-accent",
+                        }[toneFor(current.duration_minutes * 60 - elapsedFor(state, now))]
+                      }`}
+                    >
+                      {formatClock(current.duration_minutes * 60 - elapsedFor(state, now))}
+                    </span>
+                  ) : null}
+                </div>
               </div>
 
               <div className="flex flex-col justify-center rounded-2xl border border-console-line bg-console-surface p-4 sm:p-6">

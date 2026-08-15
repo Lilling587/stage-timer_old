@@ -33,10 +33,16 @@ function StagePage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [idle, setIdle] = useState(false);
   const [showIOSHint, setShowIOSHint] = useState(false);
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isStandalone = Boolean(
-    (window.navigator as Navigator & { standalone?: boolean }).standalone,
-  );
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    setIsIOS(/iPad|iPhone|iPod/.test(window.navigator.userAgent));
+    setIsStandalone(
+      Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone),
+    );
+  }, []);
+
   const idleTimer = useRef<number | null>(null);
   const wakeLock = useRef<{ release: () => Promise<void> } | null>(null);
 

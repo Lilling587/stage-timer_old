@@ -1,48 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-
-const STATE_ID = "main";
-
-const statusSchema = z.enum(["running", "paused", "stopped"]);
-
-const statePatchSchema = z
-  .object({
-    current_speaker_id: z.string().uuid().nullable().optional(),
-    status: statusSchema.optional(),
-    elapsed_seconds: z.number().int().min(0).max(360000).optional(),
-    started_at: z.string().datetime().nullable().optional(),
-    message: z.string().max(200).nullable().optional(),
-    message_sent_at: z.string().datetime().nullable().optional(),
-    show_clock: z.boolean().optional(),
-    blackout: z.boolean().optional(),
-  })
-  .strict();
-
-const inputSchema = z.object({
-  action: z.discriminatedUnion("type", [
-    z.object({
-      type: z.literal("addSpeaker"),
-      name: z.string().trim().max(80),
-      duration_minutes: z.number().int().min(1).max(600),
-      position: z.number().int().min(0).max(10000),
-    }),
-    z.object({
-      type: z.literal("updateSpeaker"),
-      id: z.string().uuid(),
-      name: z.string().trim().max(80).optional(),
-      duration_minutes: z.number().int().min(1).max(600).optional(),
-      position: z.number().int().min(0).max(10000).optional(),
-    }),
-    z.object({ type: z.literal("deleteSpeaker"), id: z.string().uuid() }),
-    z.object({
-      type: z.literal("patchState"),
-      patch: statePatchSchema,
-      expected_revision: z.number().int().min(0).optional(),
-    }),
-  ]),
-});
-
-export type AdminActionInput = z.infer<typeof inputSchema>;
+import { adminActionInputSchema } from "@/lib/admin-actions";
 
 /**
  * Every write to the speaker list and timer state runs here. The tables are
@@ -50,8 +7,9 @@ export type AdminActionInput = z.infer<typeof inputSchema>;
  * without the shared control key.
  */
 export const adminAction = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => inputSchema.parse(input))
+  .validator((input: unknown) => adminActionInputSchema.parse(input))
   .handler(async ({ data }) => {
+    const stateId = "main";
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const action = data.action;
 
@@ -89,7 +47,7 @@ export const adminAction = createServerFn({ method: "POST" })
       const { data: current } = await supabaseAdmin
         .from("timer_state")
         .select("revision")
-        .eq("id", STATE_ID)
+        .eq("id", stateId)
         .maybeSingle();
       return {
         ok: true as const,
@@ -101,7 +59,7 @@ export const adminAction = createServerFn({ method: "POST" })
     let query = supabaseAdmin
       .from("timer_state")
       .update({ ...action.patch } as never)
-      .eq("id", STATE_ID);
+      .eq("id", stateId);
     if (action.expected_revision !== undefined) {
       query = query.eq("revision", action.expected_revision);
     }
@@ -112,7 +70,7 @@ export const adminAction = createServerFn({ method: "POST" })
       const { data: latest } = await supabaseAdmin
         .from("timer_state")
         .select("*")
-        .eq("id", STATE_ID)
+        .eq("id", stateId)
         .maybeSingle();
       return { ok: false as const, conflict: true as const, latest };
     }

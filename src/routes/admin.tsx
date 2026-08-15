@@ -3,7 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { StageScreen } from "@/components/StageScreen";
-import { adminAction, type AdminActionInput } from "@/lib/admin.functions";
+import type { AdminActionInput } from "@/lib/admin-actions";
+import { adminAction } from "@/lib/admin.functions";
 import {
   DEFAULT_THRESHOLDS,
   elapsedFor,

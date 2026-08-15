@@ -1,5 +1,3 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700&display=swap');
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -67,6 +65,22 @@
   --color-stage-safe: var(--stage-safe);
   --color-stage-warn: var(--stage-warn);
   --color-stage-danger: var(--stage-danger);
+  --color-console-bg: var(--console-bg);
+  --color-console-surface: var(--console-surface);
+  --color-console-panel: var(--console-panel);
+  --color-console-raised: var(--console-raised);
+  --color-console-line: var(--console-line);
+  --color-console-fg: var(--console-fg);
+  --color-console-muted: var(--console-muted);
+  --color-console-dim: var(--console-dim);
+  --color-console-accent: var(--console-accent);
+  --color-console-accent-hover: var(--console-accent-hover);
+  --color-console-accent-fg: var(--console-accent-fg);
+  --color-console-danger: var(--console-danger);
+  --color-console-ok: var(--console-ok);
+  --font-sora: 'Sora', sans-serif;
+  --font-manrope: 'Manrope', sans-serif;
+  --font-console-mono: 'JetBrains Mono', ui-monospace, monospace;
  --font-outfit: 'Outfit', sans-serif;
 }
 
@@ -112,6 +126,21 @@
   --stage-safe: oklch(0.8 0.19 148);
   --stage-warn: oklch(0.86 0.17 92);
   --stage-danger: oklch(0.68 0.22 25);
+
+  /* Control room console palette (charcoal + ember, always dark) */
+  --console-bg: oklch(0.185 0 0);
+  --console-surface: oklch(0.222 0 0);
+  --console-panel: oklch(0.246 0 0);
+  --console-raised: oklch(0.278 0 0);
+  --console-line: oklch(0.318 0 0);
+  --console-fg: oklch(0.975 0 0);
+  --console-muted: oklch(0.62 0 0);
+  --console-dim: oklch(0.44 0 0);
+  --console-accent: oklch(0.653 0.166 39.5);
+  --console-accent-hover: oklch(0.71 0.17 39.5);
+  --console-accent-fg: oklch(0.99 0 0);
+  --console-danger: oklch(0.62 0.21 27);
+  --console-ok: oklch(0.72 0.18 148);
 }
 
 .dark {

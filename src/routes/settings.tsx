@@ -53,7 +53,7 @@ function SettingsPage() {
           </h2>
           <div className="flex flex-wrap items-end gap-2">
             <div className="flex flex-col gap-1">
-              <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-muted">Colours</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-muted">Timer colour warnings</span>
               <button
                 type="button"
                 onClick={() => setThresholds({ ...thresholds, enabled: !thresholds.enabled })}

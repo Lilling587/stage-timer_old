@@ -447,7 +447,7 @@ function AdminPage() {
         <div className="grid flex-1 gap-6 p-6 lg:grid-cols-12 lg:gap-8 lg:p-8">
           <section className="flex flex-col gap-6 lg:col-span-8 lg:gap-8">
             <div className="relative aspect-video overflow-hidden rounded-3xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
-              <StageScreen speaker={current} state={state} now={now} />
+              <StageScreen speaker={current} state={state} now={now} compact />
               <div className="pointer-events-none absolute left-6 top-6 flex items-center gap-2">
                 <span className="rounded-md bg-console-danger px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.2em] text-console-accent-fg">
                   Live feed

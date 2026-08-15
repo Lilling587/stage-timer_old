@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { DEFAULT_THRESHOLDS, useThresholdControl } from "@/lib/show";
+import { DEFAULT_ADJUSTMENTS, DEFAULT_THRESHOLDS, useAdjustmentSettings, useThresholdControl } from "@/lib/show";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -33,6 +33,7 @@ const accentButton =
 
 function SettingsPage() {
   const { thresholds, setThresholds } = useThresholdControl();
+  const { adjustments, setAdjustments } = useAdjustmentSettings();
 
   return (
     <div className="min-h-screen bg-console-bg font-manrope text-console-fg">
@@ -136,6 +137,45 @@ function SettingsPage() {
                 }`}
               />
             </button>
+          </div>
+        </section>
+
+      <section className="rounded-2xl border border-console-line bg-console-surface p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
+              Time adjustment buttons
+            </h2>
+            <button
+              type="button"
+              onClick={() => setAdjustments(DEFAULT_ADJUSTMENTS)}
+              className={ghostButton}
+            >
+              Reset
+            </button>
+          </div>
+          <p className="mb-3 text-[11px] text-console-dim">
+            Set the four time adjustment button values shown in the command page.
+          </p>
+          <div className="grid grid-cols-4 gap-2">
+            {adjustments.map((val, i) => (
+              <label key={i} className="flex flex-col gap-1">
+                <span className={`text-[9px] font-bold uppercase tracking-[0.15em] ${val < 0 ? "text-console-danger" : "text-console-ok"}`}>
+                  {val < 0 ? `Button ${i + 1} (−)` : `Button ${i + 1} (+)`}
+                </span>
+                <input
+                  type="number"
+                  min={-600}
+                  max={600}
+                  value={val}
+                  onChange={(e) => {
+                    const next = [...adjustments];
+                    next[i] = Number(e.target.value);
+                    setAdjustments(next);
+                  }}
+                  className="w-full rounded-lg border border-console-line bg-console-bg px-2 py-1.5 text-sm text-console-fg outline-none focus:border-console-accent"
+                />
+              </label>
+            ))}
           </div>
         </section>
 

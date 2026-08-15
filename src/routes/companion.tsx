@@ -309,6 +309,10 @@ function CompanionPage() {
                   <h4 className="text-xs font-medium">
                     Feedbacks — the button recolours itself from the status endpoint
                   </h4>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    In Companion: Add feedback → Internal → Variable text value. Fill in the values
+                    below.
+                  </p>
                   <ul className="mt-2 space-y-2">
                     {item.feedbacks.map((fb) => {
                       const active = isFeedbackActive(live, fb);
@@ -328,9 +332,31 @@ function CompanionPage() {
                                 </span>
                               ) : null}
                             </p>
-                            <p className="font-mono text-[11px] text-muted-foreground">
-                              Internal: Variable value · {fb.variable} {fb.comparison} “{fb.value}”
+                            <p className="text-[11px] text-muted-foreground">
+                              Comparison: {fb.comparison}
                             </p>
+                            <dl className="mt-1 grid gap-x-4 gap-y-0.5 text-[11px] sm:grid-cols-2">
+                              {[
+                                { label: "Variable", value: fb.variable },
+                                { label: "Value", value: fb.value },
+                                { label: "Background", value: fb.bgColor },
+                                { label: "Text colour", value: fb.textColor },
+                              ].map((row) => (
+                                <div key={row.label} className="flex items-center gap-1">
+                                  <dt className="text-muted-foreground">{row.label}: </dt>
+                                  <dd className="font-mono break-all">{row.value}</dd>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-6 px-1.5 text-[11px]"
+                                    onClick={() => copy(row.value)}
+                                    aria-label={`Copy feedback ${row.label.toLowerCase()}`}
+                                  >
+                                    Copy
+                                  </Button>
+                                </div>
+                              ))}
+                            </dl>
                             <p className="text-muted-foreground">{fb.description}</p>
                           </div>
                         </li>

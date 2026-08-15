@@ -294,6 +294,14 @@ export function useThresholdControl() {
     const channel = supabase.channel(THRESHOLDS_CHANNEL);
     channelRef.current = channel;
     channel
+      .on("broadcast", { event: "set" }, ({ payload }) => {
+        // Another console (e.g. the settings page) changed the thresholds.
+        const next = sanitizeThresholds((payload as { thresholds?: unknown })?.thresholds);
+        if (next) {
+          thresholdsRef.current = next;
+          setThresholds(next);
+        }
+      })
       .on("broadcast", { event: "request" }, () => {
         void channel.send({
           type: "broadcast",

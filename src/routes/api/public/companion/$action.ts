@@ -288,8 +288,7 @@ async function handle(request: Request, action: string) {
       return json(statusPayload(values as Partial<StateRow>));
     }
 
-    default:
-      case "blackout": {
+    case "blackout": {
       const values = { blackout: !(state.blackout ?? false) };
       const error = await patch(values);
       if (error) return json({ error }, 500);
@@ -311,7 +310,6 @@ async function handle(request: Request, action: string) {
       return json(statusPayload(values as Partial<StateRow>));
     }
 
-    default:
     default:
       return json({ error: `Unknown action "${action}"` }, 404);
   }

@@ -465,6 +465,7 @@ function AdminPage() {
                 now={now}
                 compact
                 showElapsed={displayMode === "elapsed"}
+                thresholds={thresholds}
               />
               <div className="pointer-events-none absolute left-6 top-6 flex items-center gap-2">
                 <span className="rounded-md bg-console-danger px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.2em] text-console-accent-fg">
@@ -507,8 +508,12 @@ function AdminPage() {
                           danger: "text-console-danger",
                           warn: "text-console-accent",
                           safe: "text-console-ok",
-                        }[toneFor(current.duration_minutes * 60 - elapsedFor(state, now))]
-                        // thresholds applied below
+                        }[
+                          toneFor(
+                            current.duration_minutes * 60 - elapsedFor(state, now),
+                            thresholds,
+                          )
+                        ]
                       }`}
                     >
                       {formatClock(

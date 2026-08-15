@@ -1,7 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { adminAction } from "@/lib/admin.functions";
-import { DEFAULT_THRESHOLDS, useShow, useThresholdControl } from "@/lib/show";
+import { DEFAULT_THRESHOLDS, useThresholdControl } from "@/lib/show";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -34,28 +32,7 @@ const accentButton =
   "rounded-lg bg-console-accent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-accent-fg transition-all hover:bg-console-accent-hover active:scale-95 disabled:pointer-events-none disabled:opacity-40";
 
 function SettingsPage() {
-  const { state, refresh } = useShow();
   const { thresholds, setThresholds } = useThresholdControl();
-
-  async function patchState(patch: Record<string, unknown>) {
-    try {
-      const result = (await adminAction({
-        data: {
-          action: {
-            type: "patchState",
-            patch: patch as never,
-            expected_revision: state?.revision,
-          },
-        },
-      })) as { ok: boolean; conflict?: boolean } | undefined;
-      if (result && result.conflict) {
-        await refresh();
-        toast.warning("Another admin just changed the stage. We refreshed to the latest state.");
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
-  }
 
   return (
     <div className="min-h-screen bg-console-bg font-manrope text-console-fg">
@@ -132,32 +109,7 @@ function SettingsPage() {
           </button>
         </section>
 
-        <section className="flex items-center justify-between rounded-2xl border border-console-line bg-console-surface p-5">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
-              Clock display
-            </span>
-            <span className="text-[11px] text-console-dim">
-              Show the time of day instead of the timer
-            </span>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={state?.show_clock ?? false}
-            aria-label="Show clock instead of timer"
-            onClick={() => patchState({ show_clock: !(state?.show_clock ?? false) })}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-              state?.show_clock ? "bg-console-accent" : "bg-console-raised"
-            }`}
-          >
-            <span
-              className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
-                state?.show_clock ? "right-1" : "left-1"
-              }`}
-            />
-          </button>
-        </section>
+        
       </main>
     </div>
   );

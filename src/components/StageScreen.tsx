@@ -40,7 +40,10 @@ export function StageScreen({
   const remaining = speaker ? total - elapsed : 0;
   const tone = toneFor(remaining, thresholds);
   const isRunning = state?.status === "running";
-  const toneStyle = tone === "over" && !isRunning ? "text-stage-danger" : toneClass[tone];
+  const toneStyle =
+    tone === "over" && (!isRunning || !thresholds.blinkOnOver)
+      ? "text-stage-danger"
+      : toneClass[tone];
 
   if (state?.blackout && !compact) {
     return <div className="relative flex h-full w-full bg-black" />;

@@ -12,6 +12,8 @@ type StateRow = {
   started_at: string | null;
   message: string | null;
   message_sent_at: string | null;
+  blackout: boolean;
+  show_clock: boolean;
 };
 
 const minutesSchema = z.coerce.number().finite().min(-600).max(600);

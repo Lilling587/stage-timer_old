@@ -70,13 +70,13 @@ function isFeedbackActive(live: StatusPayload | null, feedback: CompanionFeedbac
 export const Route = createFileRoute("/companion")({
   head: () => ({
     meta: [
-      { title: "Bitfocus Companion setup — Conference speaker timer" },
+      { title: "Bitfocus Companion setup — Stage Timer" },
       {
         name: "description",
         content:
           "Copy-paste HTTP endpoints to control the stage timer from Bitfocus Companion, even when the app window is not focused.",
       },
-      { property: "og:title", content: "Bitfocus Companion setup — Conference speaker timer" },
+      { property: "og:title", content: "Bitfocus Companion setup — Stage Timer" },
       {
         property: "og:description",
         content: "Control start, pause, speakers, talk length and stage messages from Companion.",

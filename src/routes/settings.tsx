@@ -51,16 +51,23 @@ function SettingsPage() {
           <h2 className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
             Colour thresholds
           </h2>
-          <div className="flex flex-wrap items-end gap-2">
-            <div className="flex flex-col gap-1">
+         <div className="flex flex-col gap-1">
               <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-muted">Timer colour warnings</span>
               <button
                 type="button"
+                role="switch"
+                aria-checked={thresholds.enabled}
+                aria-label="Enable timer colour warnings"
                 onClick={() => setThresholds({ ...thresholds, enabled: !thresholds.enabled })}
-                aria-pressed={!thresholds.enabled}
-                className={`shrink-0 ${thresholds.enabled ? ghostButton : accentButton}`}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  thresholds.enabled ? "bg-console-accent" : "bg-console-raised"
+                }`}
               >
-                {thresholds.enabled ? "On" : "Off"}
+                <span
+                  className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
+                    thresholds.enabled ? "right-1" : "left-1"
+                  }`}
+                />
               </button>
             </div>
             <label className={`flex flex-col gap-1 ${thresholds.enabled ? "" : "opacity-40"}`}>

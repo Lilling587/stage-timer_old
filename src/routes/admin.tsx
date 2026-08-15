@@ -643,9 +643,11 @@ function AdminPage() {
               <button
                 type="button"
                 aria-pressed={displayMode === "elapsed"}
-                onClick={() =>
-                  setDisplayMode(displayMode === "elapsed" ? "remaining" : "elapsed")
-                }
+                onClick={() => {
+                  const next = displayMode === "elapsed" ? "remaining" : "elapsed";
+                  setDisplayMode(next);
+                  void patchState({ display_mode: next });
+                }}
                 className={`w-full ${displayMode === "elapsed" ? accentButton : ghostButton}`}
               >
                 Timer remaining/elapsed

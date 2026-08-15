@@ -52,14 +52,17 @@ function SettingsPage() {
             Colour thresholds
           </h2>
           <div className="flex flex-wrap items-end gap-2">
-            <button
-              type="button"
-              onClick={() => setThresholds({ ...thresholds, enabled: !thresholds.enabled })}
-              aria-pressed={!thresholds.enabled}
-              className={`shrink-0 ${thresholds.enabled ? ghostButton : accentButton}`}
-            >
-              {thresholds.enabled ? "On" : "Off"}
-            </button>
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-muted">Colours</span>
+              <button
+                type="button"
+                onClick={() => setThresholds({ ...thresholds, enabled: !thresholds.enabled })}
+                aria-pressed={!thresholds.enabled}
+                className={`shrink-0 ${thresholds.enabled ? ghostButton : accentButton}`}
+              >
+                {thresholds.enabled ? "On" : "Off"}
+              </button>
+            </div>
             <label className={`flex flex-col gap-1 ${thresholds.enabled ? "" : "opacity-40"}`}>
               <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-accent">Yellow at</span>
               <input

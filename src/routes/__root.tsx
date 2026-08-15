@@ -78,12 +78,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Speaker Timer" },
+      { title: "Stage Timer" },
       {
         name: "description",
         content: "Keep conference talks on time with a synced control room and stage countdown.",
       },
-      { property: "og:title", content: "Speaker Timer" },
+      { property: "og:title", content: "Stage Timer" },
       {
         property: "og:description",
         content: "Keep conference talks on time with a synced control room and stage countdown.",

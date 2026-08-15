@@ -1,4 +1,12 @@
-import { elapsedFor, formatClock, toneFor, type Speaker, type TimerState } from "@/lib/show";
+import {
+  DEFAULT_THRESHOLDS,
+  elapsedFor,
+  formatClock,
+  toneFor,
+  type Speaker,
+  type Thresholds,
+  type TimerState,
+} from "@/lib/show";
 
 const toneClass = {
   safe: "text-stage-safe",
@@ -13,12 +21,14 @@ export function StageScreen({
   now,
   compact = false,
   showElapsed = false,
+  thresholds = DEFAULT_THRESHOLDS,
 }: {
   speaker: Speaker | null;
   state: TimerState | null;
   now: number;
   compact?: boolean;
   showElapsed?: boolean;
+  thresholds?: Thresholds;
 }) {
   const message = state?.message ?? null;
   const messageVisible = Boolean(message);
@@ -28,7 +38,7 @@ export function StageScreen({
   const total = (speaker?.duration_minutes ?? 0) * 60;
   const elapsed = elapsedFor(state, now);
   const remaining = speaker ? total - elapsed : 0;
-  const tone = toneFor(remaining);
+  const tone = toneFor(remaining, thresholds);
 
   if (state?.blackout && !compact) {
     return <div className="relative flex h-full w-full bg-black" />;

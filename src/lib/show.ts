@@ -126,11 +126,27 @@ export function useNow(active: boolean) {
   return now;
 }
 
-export function toneFor(remaining: number) {
+export type Thresholds = { warnMinutes: number; dangerMinutes: number };
+
+export const DEFAULT_THRESHOLDS: Thresholds = { warnMinutes: 5, dangerMinutes: 2 };
+
+export function toneFor(remaining: number, thresholds: Thresholds = DEFAULT_THRESHOLDS) {
   if (remaining <= 0) return "over" as const;
-  if (remaining < 120) return "danger" as const;
-  if (remaining < 300) return "warn" as const;
+  if (remaining < thresholds.dangerMinutes * 60) return "danger" as const;
+  if (remaining < thresholds.warnMinutes * 60) return "warn" as const;
   return "safe" as const;
+}
+
+function sanitizeThresholds(value: unknown): Thresholds | null {
+  const raw = value as Partial<Thresholds> | undefined;
+  if (!raw) return null;
+  const warn = Number(raw.warnMinutes);
+  const danger = Number(raw.dangerMinutes);
+  if (!Number.isFinite(warn) || !Number.isFinite(danger)) return null;
+  const clamp = (n: number) => Math.min(120, Math.max(0, Math.round(n * 10) / 10));
+  const safeDanger = clamp(danger);
+  const safeWarn = Math.max(clamp(warn), safeDanger);
+  return { warnMinutes: safeWarn, dangerMinutes: safeDanger };
 }
 
 /**
@@ -220,4 +236,99 @@ export function useDisplayModeControl() {
   }, []);
 
   return { displayMode: mode, setDisplayMode };
+}
+
+const THRESHOLDS_CHANNEL = "stage-thresholds";
+const THRESHOLDS_STORAGE = "stage-thresholds";
+
+/**
+ * Stage side: listens for the colour thresholds chosen in the control room.
+ */
+export function useStageThresholds() {
+  const [thresholds, setThresholds] = useState<Thresholds>(DEFAULT_THRESHOLDS);
+
+  useEffect(() => {
+    const channel = supabase.channel(THRESHOLDS_CHANNEL);
+    channel
+      .on("broadcast", { event: "set" }, ({ payload }) => {
+        const next = sanitizeThresholds((payload as { thresholds?: unknown })?.thresholds);
+        if (next) setThresholds(next);
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.send({ type: "broadcast", event: "request", payload: {} });
+        }
+      });
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return thresholds;
+}
+
+/**
+ * Control room side: owns the colour thresholds, remembers them locally and
+ * pushes them to every stage screen.
+ */
+export function useThresholdControl() {
+  const [thresholds, setThresholds] = useState<Thresholds>(DEFAULT_THRESHOLDS);
+  const thresholdsRef = useRef<Thresholds>(DEFAULT_THRESHOLDS);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = sanitizeThresholds(
+        JSON.parse(window.localStorage.getItem(THRESHOLDS_STORAGE) ?? "null"),
+      );
+      if (stored) {
+        thresholdsRef.current = stored;
+        setThresholds(stored);
+      }
+    } catch {
+      // ignore unreadable storage
+    }
+
+    const channel = supabase.channel(THRESHOLDS_CHANNEL);
+    channelRef.current = channel;
+    channel
+      .on("broadcast", { event: "request" }, () => {
+        void channel.send({
+          type: "broadcast",
+          event: "set",
+          payload: { thresholds: thresholdsRef.current },
+        });
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.send({
+            type: "broadcast",
+            event: "set",
+            payload: { thresholds: thresholdsRef.current },
+          });
+        }
+      });
+    return () => {
+      channelRef.current = null;
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const updateThresholds = useCallback((next: Thresholds) => {
+    const safe = sanitizeThresholds(next) ?? DEFAULT_THRESHOLDS;
+    thresholdsRef.current = safe;
+    setThresholds(safe);
+    try {
+      window.localStorage.setItem(THRESHOLDS_STORAGE, JSON.stringify(safe));
+    } catch {
+      // ignore unwritable storage
+    }
+    void channelRef.current?.send({
+      type: "broadcast",
+      event: "set",
+      payload: { thresholds: safe },
+    });
+  }, []);
+
+  return { thresholds, setThresholds: updateThresholds };
 }

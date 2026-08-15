@@ -109,7 +109,36 @@ function SettingsPage() {
           </div>
         </section>
 
-        
+        <section className="rounded-2xl border border-console-line bg-console-surface p-4">
+          <h2 className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
+            Stage display
+          </h2>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-console-fg">Blink when over time</span>
+              <span className="text-[11px] text-console-dim">
+                Timer flashes red when the speaker runs past their allotted time
+              </span>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={thresholds.blinkOnOver}
+              aria-label="Blink timer when over time"
+              onClick={() => setThresholds({ ...thresholds, blinkOnOver: !thresholds.blinkOnOver })}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                thresholds.blinkOnOver ? "bg-console-accent" : "bg-console-raised"
+              }`}
+            >
+              <span
+                className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
+                  thresholds.blinkOnOver ? "right-1" : "left-1"
+                }`}
+              />
+            </button>
+          </div>
+        </section>
+
       </main>
     </div>
   );

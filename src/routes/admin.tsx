@@ -473,9 +473,6 @@ function AdminPage() {
                 <span className="rounded-md bg-console-danger px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.2em] text-console-accent-fg">
                   Live feed
                 </span>
-                <span className="rounded-md border border-console-fg/10 bg-black/50 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-console-fg backdrop-blur-md">
-                  Source: main
-                </span>
               </div>
             </div>
 

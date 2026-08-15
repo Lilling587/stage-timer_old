@@ -15,6 +15,7 @@ export type TimerState = {
   status: "running" | "paused" | "stopped";
   elapsed_seconds: number;
   started_at: string | null;
+  display_mode: string;
   show_clock: boolean;
   message: string | null;
   message_sent_at: string | null;

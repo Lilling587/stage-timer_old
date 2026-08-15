@@ -126,11 +126,12 @@ export function useNow(active: boolean) {
   return now;
 }
 
-export type Thresholds = { warnMinutes: number; dangerMinutes: number };
+export type Thresholds = { warnMinutes: number; dangerMinutes: number; enabled: boolean };
 
-export const DEFAULT_THRESHOLDS: Thresholds = { warnMinutes: 5, dangerMinutes: 2 };
+export const DEFAULT_THRESHOLDS: Thresholds = { warnMinutes: 5, dangerMinutes: 2, enabled: true };
 
 export function toneFor(remaining: number, thresholds: Thresholds = DEFAULT_THRESHOLDS) {
+  if (thresholds.enabled === false) return "safe" as const;
   if (remaining <= 0) return "over" as const;
   if (remaining < thresholds.dangerMinutes * 60) return "danger" as const;
   if (remaining < thresholds.warnMinutes * 60) return "warn" as const;
@@ -146,7 +147,7 @@ function sanitizeThresholds(value: unknown): Thresholds | null {
   const clamp = (n: number) => Math.min(120, Math.max(0, Math.round(n * 10) / 10));
   const safeDanger = clamp(danger);
   const safeWarn = Math.max(clamp(warn), safeDanger);
-  return { warnMinutes: safeWarn, dangerMinutes: safeDanger };
+  return { warnMinutes: safeWarn, dangerMinutes: safeDanger, enabled: raw.enabled !== false };
 }
 
 /**

@@ -627,7 +627,7 @@ function AdminPage() {
               >
                 Timer remaining/elapsed
               </button>
-              <div className="flex items-center justify-between rounded-xl border border-console-line bg-console-surface px-4 py-3">
+              <div className="flex flex-[3] items-center justify-between rounded-xl border border-console-line bg-console-surface px-4 py-3">
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
                   Clock mode
                 </span>

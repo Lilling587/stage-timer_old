@@ -9,6 +9,7 @@ import {
   formatClock,
   toneFor,
   useAdminPresence,
+  useDisplayModeControl,
   useNow,
   useShow,
   type Speaker,
@@ -60,6 +61,7 @@ const accentButton =
 function AdminPage() {
   const { speakers, state, refresh, syncStatus } = useShow();
   const adminCount = useAdminPresence();
+  const { displayMode, setDisplayMode } = useDisplayModeControl();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
@@ -455,7 +457,13 @@ function AdminPage() {
         <div className="grid flex-1 gap-6 p-6 lg:grid-cols-12 lg:gap-8 lg:p-8">
           <section className="flex flex-col gap-6 lg:col-span-8 lg:gap-8">
             <div className="relative aspect-video overflow-hidden rounded-3xl border border-console-line bg-black shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]">
-              <StageScreen speaker={current} state={state} now={now} compact />
+              <StageScreen
+                speaker={current}
+                state={state}
+                now={now}
+                compact
+                showElapsed={displayMode === "elapsed"}
+              />
               <div className="pointer-events-none absolute left-6 top-6 flex items-center gap-2">
                 <span className="rounded-md bg-console-danger px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.2em] text-console-accent-fg">
                   Live feed
@@ -623,6 +631,35 @@ function AdminPage() {
                   <span
                     className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
                       state?.show_clock ? "right-1" : "left-1"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between rounded-2xl border border-console-line bg-console-surface p-5">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
+                    Timer readout
+                  </span>
+                  <span className="text-[9px] text-console-dim">
+                    Show elapsed time instead of time remaining
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={displayMode === "elapsed"}
+                  aria-label="Show elapsed time instead of remaining time"
+                  onClick={() =>
+                    setDisplayMode(displayMode === "elapsed" ? "remaining" : "elapsed")
+                  }
+                  className={`relative h-6 w-11 rounded-full transition-colors ${
+                    displayMode === "elapsed" ? "bg-console-accent" : "bg-console-raised"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
+                      displayMode === "elapsed" ? "right-1" : "left-1"
                     }`}
                   />
                 </button>

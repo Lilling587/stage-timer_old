@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Hourglass, Loader2, Maximize2, Minimize2, Timer, Wifi, WifiOff } from "lucide-react";
+import { Loader2, Maximize2, Minimize2, Wifi, WifiOff } from "lucide-react";
 import { StageScreen } from "@/components/StageScreen";
-import { useNow, useShow } from "@/lib/show";
+import { useNow, useShow, useStageDisplayMode } from "@/lib/show";
 
 export const Route = createFileRoute("/stage")({
   head: () => ({
@@ -25,13 +25,13 @@ export const Route = createFileRoute("/stage")({
 
 function StagePage() {
   const { speakers, state, syncStatus } = useShow();
+  const displayMode = useStageDisplayMode();
   const now = useNow(true);
   const speaker = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [idle, setIdle] = useState(false);
   const [showIOSHint, setShowIOSHint] = useState(false);
-  const [showElapsed, setShowElapsed] = useState(false);
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const isStandalone = Boolean(
     (window.navigator as Navigator & { standalone?: boolean }).standalone,
@@ -63,7 +63,6 @@ function StagePage() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "f" || e.key === "F") void toggleFullscreen();
-      if (e.key === "e" || e.key === "E") setShowElapsed((v) => !v);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -124,7 +123,12 @@ function StagePage() {
   return (
     <main className={`h-screen w-screen bg-stage-bg ${idle ? "cursor-none" : ""}`}>
       <h1 className="sr-only">Stage timer</h1>
-      <StageScreen speaker={speaker} state={state} now={now} showElapsed={showElapsed} />
+      <StageScreen
+        speaker={speaker}
+        state={state}
+        now={now}
+        showElapsed={displayMode === "elapsed"}
+      />
       <div
         role="status"
         aria-live="polite"
@@ -151,18 +155,6 @@ function StagePage() {
         {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
         {isFullscreen ? "Exit TV mode" : isIOS ? "TV mode ⓘ" : "TV mode"}
       </button>}
-      <button
-        type="button"
-        onClick={() => setShowElapsed((v) => !v)}
-        aria-pressed={showElapsed}
-        aria-label={showElapsed ? "Show remaining time" : "Show elapsed time"}
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full border border-stage-fg/20 bg-stage-fg/10 px-4 py-2 text-sm font-medium text-stage-fg backdrop-blur transition-opacity duration-300 hover:bg-stage-fg/20 focus-visible:opacity-100 ${
-          idle ? "opacity-0" : "opacity-100"
-        }`}
-      >
-        {showElapsed ? <Timer className="size-4" /> : <Hourglass className="size-4" />}
-        {showElapsed ? "Elapsed" : "Remaining"}
-      </button>
     {showIOSHint && (
         <div className="fixed inset-x-6 top-20 z-50 rounded-xl border border-stage-fg/20 bg-stage-bg/90 px-4 py-4 text-center text-sm text-stage-fg backdrop-blur">
           On iPhone, tap <strong>Share → Add to Home Screen</strong> to use fullscreen mode.

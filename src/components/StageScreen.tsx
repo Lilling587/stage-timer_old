@@ -39,6 +39,8 @@ export function StageScreen({
   const elapsed = elapsedFor(state, now);
   const remaining = speaker ? total - elapsed : 0;
   const tone = toneFor(remaining, thresholds);
+  const isRunning = state?.status === "running";
+  const toneStyle = tone === "over" && !isRunning ? "text-stage-danger" : toneClass[tone];
 
   if (state?.blackout && !compact) {
     return <div className="relative flex h-full w-full bg-black" />;
@@ -60,7 +62,7 @@ export function StageScreen({
       ) : null}
 
      <p
-        className={`font-outfit tabular-nums leading-none ${showClock ? "text-stage-fg" : toneClass[tone]} ${
+        className={`font-outfit tabular-nums leading-none ${showClock ? "text-stage-fg" : toneStyle} ${
           compact ? "text-5xl" : "text-[18vw] leading-[0.9]"
         }`}
       >

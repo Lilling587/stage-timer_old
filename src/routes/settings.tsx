@@ -47,26 +47,21 @@ function SettingsPage() {
       </header>
 
       <main className="mx-auto grid max-w-3xl gap-5 p-6">
-        <section className="rounded-2xl border border-console-line bg-console-surface p-5">
-          <h2 className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
+       <section className="rounded-2xl border border-console-line bg-console-surface p-4">
+          <h2 className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
             Colour thresholds
           </h2>
-          <p className="mt-1 text-[11px] text-console-dim">
-            Minutes left when the stage timer turns yellow, then red.
-          </p>
-          <button
-            type="button"
-            onClick={() => setThresholds({ ...thresholds, enabled: !thresholds.enabled })}
-            aria-pressed={!thresholds.enabled}
-            className={`mt-4 w-full ${thresholds.enabled ? ghostButton : accentButton}`}
-          >
-            {thresholds.enabled ? "Colours on" : "Always green"}
-          </button>
-          <div className={`mt-4 grid gap-3 sm:grid-cols-2 ${thresholds.enabled ? "" : "opacity-40"}`}>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-accent">
-                Yellow at
-              </span>
+          <div className="flex flex-wrap items-end gap-2">
+            <button
+              type="button"
+              onClick={() => setThresholds({ ...thresholds, enabled: !thresholds.enabled })}
+              aria-pressed={!thresholds.enabled}
+              className={`shrink-0 ${thresholds.enabled ? ghostButton : accentButton}`}
+            >
+              {thresholds.enabled ? "On" : "Off"}
+            </button>
+            <label className={`flex flex-col gap-1 ${thresholds.enabled ? "" : "opacity-40"}`}>
+              <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-accent">Yellow at</span>
               <input
                 type="number"
                 min={0}
@@ -74,17 +69,13 @@ function SettingsPage() {
                 step={0.5}
                 disabled={!thresholds.enabled}
                 value={thresholds.warnMinutes}
-                onChange={(event) =>
-                  setThresholds({ ...thresholds, warnMinutes: Number(event.target.value) })
-                }
-                className={fieldClass}
+                onChange={(e) => setThresholds({ ...thresholds, warnMinutes: Number(e.target.value) })}
+                className="w-20 rounded-lg border border-console-line bg-console-bg px-2 py-1.5 text-sm text-console-fg outline-none focus:border-console-accent"
                 aria-label="Minutes remaining when the timer turns yellow"
               />
             </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-danger">
-                Red at
-              </span>
+            <label className={`flex flex-col gap-1 ${thresholds.enabled ? "" : "opacity-40"}`}>
+              <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-console-danger">Red at</span>
               <input
                 type="number"
                 min={0}
@@ -92,21 +83,19 @@ function SettingsPage() {
                 step={0.5}
                 disabled={!thresholds.enabled}
                 value={thresholds.dangerMinutes}
-                onChange={(event) =>
-                  setThresholds({ ...thresholds, dangerMinutes: Number(event.target.value) })
-                }
-                className={fieldClass}
+                onChange={(e) => setThresholds({ ...thresholds, dangerMinutes: Number(e.target.value) })}
+                className="w-20 rounded-lg border border-console-line bg-console-bg px-2 py-1.5 text-sm text-console-fg outline-none focus:border-console-accent"
                 aria-label="Minutes remaining when the timer turns red"
               />
             </label>
+            <button
+              type="button"
+              onClick={() => setThresholds(DEFAULT_THRESHOLDS)}
+              className={`shrink-0 ${ghostButton}`}
+            >
+              Reset
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setThresholds(DEFAULT_THRESHOLDS)}
-            className={`mt-4 w-full ${ghostButton}`}
-          >
-            Reset to 5 / 2 min
-          </button>
         </section>
 
         

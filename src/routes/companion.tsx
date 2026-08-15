@@ -251,17 +251,6 @@ function CompanionPage() {
         {COMPANION_ACTIONS.map((item) => {
           const url = urlFor(item.action, item.params);
           const { preset } = item;
-          const presetText = [
-            `Button text: ${preset.buttonText}`,
-            `Background: ${preset.bgColor}`,
-            `Text colour: ${preset.textColor}`,
-            `Action: ${preset.companionAction}`,
-            `URL: ${url}`,
-            ...(item.feedbacks ?? []).map(
-              (fb) =>
-                `Feedback (Internal: Variable value): ${fb.variable} ${fb.comparison} "${fb.value}" → background ${fb.bgColor}, text ${fb.textColor}`,
-            ),
-          ].join("\n");
           const activeFeedback = (item.feedbacks ?? []).find((fb) => isFeedbackActive(live, fb));
           const swatchBg = activeFeedback?.bgColor ?? preset.bgColor;
           const swatchText = activeFeedback?.textColor ?? preset.textColor;
@@ -272,14 +261,9 @@ function CompanionPage() {
                   <h3 className="font-medium">{item.label}</h3>
                   <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => copy(url)}>
-                    Copy URL
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => copy(presetText)}>
-                    Copy preset
-                  </Button>
-                </div>
+                <Button size="sm" variant="outline" onClick={() => copy(url)}>
+                  Copy URL
+                </Button>
               </div>
               <code className="mt-3 block overflow-x-auto rounded-md bg-muted px-3 py-2 text-xs">
                 {url}
@@ -294,22 +278,26 @@ function CompanionPage() {
                   {preset.buttonText.replace(/\\n/g, "\n")}
                 </div>
                 <dl className="grid flex-1 gap-x-4 gap-y-1 text-xs sm:grid-cols-2">
-                  <div>
-                    <dt className="inline text-muted-foreground">Button text: </dt>
-                    <dd className="inline font-mono">{preset.buttonText}</dd>
-                  </div>
-                  <div>
-                    <dt className="inline text-muted-foreground">Companion action: </dt>
-                    <dd className="inline">{preset.companionAction}</dd>
-                  </div>
-                  <div>
-                    <dt className="inline text-muted-foreground">Background: </dt>
-                    <dd className="inline font-mono">{preset.bgColor}</dd>
-                  </div>
-                  <div>
-                    <dt className="inline text-muted-foreground">Text colour: </dt>
-                    <dd className="inline font-mono">{preset.textColor}</dd>
-                  </div>
+                  {[
+                    { label: "Button text", value: preset.buttonText },
+                    { label: "Companion action", value: preset.companionAction },
+                    { label: "Background", value: preset.bgColor },
+                    { label: "Text colour", value: preset.textColor },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center gap-1">
+                      <dt className="text-muted-foreground">{row.label}: </dt>
+                      <dd className="font-mono break-all">{row.value}</dd>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 px-1.5 text-[11px]"
+                        onClick={() => copy(row.value)}
+                        aria-label={`Copy ${row.label.toLowerCase()}`}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  ))}
                   {preset.notes ? (
                     <div className="sm:col-span-2 text-muted-foreground">{preset.notes}</div>
                   ) : null}

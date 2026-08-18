@@ -552,7 +552,20 @@ function AdminPage() {
       </aside>
 
       {/* Main console */}
-        <main className="order-1 flex min-w-0 flex-1 flex-col lg:order-2 lg:h-screen lg:overflow-y-auto">
+              <div className="order-1 flex items-center justify-between border-b border-console-line bg-console-panel px-4 py-3 lg:hidden">
+        <h2 className="font-sora text-[11px] font-bold uppercase tracking-[0.2em] text-console-muted">
+          Run of show
+        </h2>
+        {current ? (
+          <span className="flex items-center gap-2 rounded-full border border-console-accent/30 bg-console-accent/10 px-2 py-1">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-console-accent" />
+            <span className="font-console-mono text-[9px] font-bold uppercase text-console-accent">
+              Live
+            </span>
+          </span>
+        ) : null}
+      </div>
+      <main className="order-2 flex min-w-0 flex-1 flex-col lg:order-2 lg:h-screen lg:overflow-y-auto">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-console-line bg-console-surface/80 px-4 py-2.5 lg:px-6">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-3">

@@ -432,7 +432,7 @@ function AdminPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-console-bg font-manrope text-console-fg lg:flex-row">
       {/* Sidebar: run of show */}
-      <aside className="flex w-full flex-col border-console-line bg-console-surface lg:h-screen lg:w-80 lg:shrink-0 lg:border-r">
+        <aside className="order-2 flex w-full flex-col border-console-line bg-console-surface lg:order-1 lg:h-screen lg:w-80 lg:shrink-0 lg:border-r">
         <div className="flex items-center justify-between border-b border-console-line bg-console-panel px-4 py-3">
           <h2 className="font-sora text-[11px] font-bold uppercase tracking-[0.2em] text-console-muted">
             Run of show
@@ -552,7 +552,7 @@ function AdminPage() {
       </aside>
 
       {/* Main console */}
-      <main className="flex min-w-0 flex-1 flex-col lg:h-screen lg:overflow-y-auto">
+        <main className="order-1 flex min-w-0 flex-1 flex-col lg:order-2 lg:h-screen lg:overflow-y-auto">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-console-line bg-console-surface/80 px-4 py-2.5 lg:px-6">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-3">

@@ -432,7 +432,7 @@ function AdminPage() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-console-bg font-manrope text-console-fg lg:flex-row">
       {/* Sidebar: run of show */}
-        <aside className="order-2 flex w-full flex-col border-console-line bg-console-surface lg:order-1 lg:h-screen lg:w-80 lg:shrink-0 lg:border-r">
+              <aside className="order-3 flex w-full flex-col border-console-line bg-console-surface lg:order-1 lg:h-screen lg:w-80 lg:shrink-0 lg:border-r">
                        <div className="hidden items-center justify-between border-b border-console-line bg-console-panel px-4 py-3 lg:flex">
           <h2 className="font-sora text-[11px] font-bold uppercase tracking-[0.2em] text-console-muted">
             Run of show

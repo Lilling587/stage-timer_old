@@ -21,6 +21,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { z } from "zod";
 import { StageScreen } from "@/components/StageScreen";
 import type { AdminActionInput } from "@/lib/admin-actions";
@@ -337,18 +338,42 @@ function AdminPage() {
     });
   }
 
-  function downloadTemplate() {
-            const data = [
-      ["Namn på företag:", ""],
-      ["", ""],
-      ["Talarens namn", "Tid i minuter", "Starttid"],
-      ...Array.from({ length: 10 }, () => ["", "", ""]),
-    ];
-    const sheet = XLSX.utils.aoa_to_sheet(data);
-    sheet["!cols"] = [{ wpx: 150 }, { wpx: 75 }, { wpx: 100 }];
-    const book = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(book, sheet, "Talarlista");
-    XLSX.writeFile(book, "Talarlista.xlsx");
+  async function downloadTemplate() {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Talarlista");
+    sheet.columns = [{ width: 22 }, { width: 11 }, { width: 15 }];
+
+    const companyRow = sheet.getRow(1);
+    companyRow.getCell(1).value = "Namn på företag:";
+    companyRow.getCell(1).font = { bold: true };
+    companyRow.getCell(2).value = "";
+
+    const headerRow = sheet.getRow(3);
+    ["Talarens namn", "Tid i minuter", "Starttid"].forEach((label, i) => {
+      const cell = headerRow.getCell(i + 1);
+      cell.value = label;
+      cell.font = { bold: true };
+    });
+
+    for (let r = 4; r <= 13; r += 1) {
+      const row = sheet.getRow(r);
+      row.getCell(1).value = "";
+      row.getCell(2).value = "";
+      row.getCell(3).value = "";
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Talarlista.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   }
 
   async function handleCsvFile(file: File) {

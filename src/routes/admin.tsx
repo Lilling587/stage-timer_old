@@ -370,6 +370,7 @@ function AdminPage() {
   }
 
   function startEdit(speaker: Speaker) {
+    setCsvRows(null);
     setEditingId(speaker.id);
     setName(speaker.name);
     setDuration(String(speaker.duration_minutes));

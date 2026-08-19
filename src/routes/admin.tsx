@@ -636,6 +636,92 @@ function AdminPage() {
             </div>
           </form>
 
+          <div className="rounded-xl border border-console-line bg-console-panel p-3">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-dim">
+              Bulk import
+            </p>
+            <div className="flex gap-2">
+              <button type="button" className={`flex-1 ${ghostButton}`} onClick={downloadTemplate}>
+                Download template
+              </button>
+              <button
+                type="button"
+                className={`flex-1 ${ghostButton}`}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Import CSV
+              </button>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) void handleCsvFile(file);
+              }}
+            />
+
+            {csvRows ? (
+              <div className="mt-3 rounded-lg border border-console-line bg-console-bg p-2">
+                <p className="mb-2 font-console-mono text-[10px] text-console-muted">
+                  {csvRows.length} row{csvRows.length === 1 ? "" : "s"} ready
+                  {csvSkipped > 0 ? ` · ${csvSkipped} skipped` : ""}
+                </p>
+                <div className="max-h-40 overflow-y-auto">
+                  <table className="w-full text-left text-[11px]">
+                    <thead>
+                      <tr className="text-[9px] uppercase tracking-[0.2em] text-console-dim">
+                        <th className="pb-1 font-bold">Name</th>
+                        <th className="pb-1 font-bold">Minutes</th>
+                        <th className="pb-1 font-bold">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {csvRows.map((row, i) => (
+                        <tr key={i} className="border-t border-console-line/60 align-top">
+                          <td className="py-1 pr-2 text-console-fg">
+                            {row.name.trim() === "" ? (
+                              <span className="italic text-console-muted">Unnamed</span>
+                            ) : (
+                              row.name
+                            )}
+                          </td>
+                          <td className="py-1 pr-2 font-console-mono text-console-muted">
+                            {row.minutes}
+                          </td>
+                          <td className="py-1 text-console-muted">{row.notes}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    disabled={importing}
+                    onClick={() => void importCsvRows()}
+                    className={`flex-1 ${accentButton}`}
+                  >
+                    {importing ? "Importing…" : `Import ${csvRows.length} speakers`}
+                  </button>
+                  <button
+                    type="button"
+                    className={ghostButton}
+                    onClick={() => {
+                      setCsvRows(null);
+                      setCsvSkipped(0);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           {speakers.length === 0 ? (
             <p className="px-1 text-xs text-console-muted">
               No speakers yet. Add the first one above.

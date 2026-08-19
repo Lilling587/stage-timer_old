@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -80,6 +80,58 @@ const ghostButton =
 
 const accentButton =
   "rounded-lg bg-console-accent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-accent-fg transition-all hover:bg-console-accent-hover active:scale-95 disabled:pointer-events-none disabled:opacity-40";
+
+type CsvRow = { name: string; minutes: number; notes: string };
+
+const CSV_TEMPLATE = "Name,Minutes,Notes\nExample Speaker,20,Optional notes here\n";
+
+function splitCsvLine(line: string) {
+  const separator = line.split(";").length > line.split(",").length ? ";" : ",";
+  const cells: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i]!;
+    if (char === '"') {
+      if (quoted && line[i + 1] === '"') {
+        cell += '"';
+        i += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === separator && !quoted) {
+      cells.push(cell);
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+  cells.push(cell);
+  return cells.map((value) => value.trim());
+}
+
+function parseSpeakerCsv(text: string): { rows: CsvRow[]; skipped: number } {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== "");
+  const rows: CsvRow[] = [];
+  let skipped = 0;
+  lines.slice(1).forEach((line) => {
+    const [rawName = "", rawMinutes = "", rawNotes = ""] = splitCsvLine(line);
+    const minutes = Number(rawMinutes.replace(",", "."));
+    if (!Number.isFinite(minutes) || !Number.isInteger(minutes) || minutes < 1 || minutes > 600) {
+      skipped += 1;
+      return;
+    }
+    rows.push({
+      name: rawName.slice(0, 80),
+      minutes,
+      notes: rawNotes.slice(0, 500),
+    });
+  });
+  return { rows, skipped };
+}
 
 type SpeakerCardProps = {
   speaker: Speaker;

@@ -114,9 +114,13 @@ function parseSpeakerCsv(text: string): { rows: CsvRow[]; skipped: number } {
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line !== "");
-  const rows: CsvRow[] = [];
+    const rows: CsvRow[] = [];
   let skipped = 0;
-  lines.slice(1).forEach((line) => {
+  const headerIndex = lines.findIndex((line) =>
+    line.toLowerCase().includes("talarens namn"),
+  );
+  const dataLines = lines.slice(headerIndex >= 0 ? headerIndex + 1 : 1);
+  dataLines.forEach((line) => {
     const [rawName = "", rawMinutes = "", rawNotes = ""] = splitCsvLine(line);
     const minutes = Number(rawMinutes.replace(",", "."));
     if (!Number.isFinite(minutes) || !Number.isInteger(minutes) || minutes < 1 || minutes > 600) {

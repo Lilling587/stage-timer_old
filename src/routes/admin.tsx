@@ -488,6 +488,18 @@ function AdminPage() {
                 />
               </div>
             </div>
+                        <div className="mt-2">
+              <label htmlFor="speaker-notes" className="sr-only">Notes</label>
+              <textarea
+                id="speaker-notes"
+                value={notes}
+                maxLength={500}
+                rows={2}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Private notes (pronunciation, topic, cues…)"
+                className={`${fieldClass} resize-none`}
+              />
+            </div>
             <div className="mt-2 flex gap-2">
               <button type="submit" className={`flex-1 ${accentButton}`}>
                 {editingId ? "Save changes" : "Add speaker"}

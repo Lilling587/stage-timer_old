@@ -14,10 +14,11 @@ export const adminAction = createServerFn({ method: "POST" })
     const action = data.action;
 
     if (action.type === "addSpeaker") {
-      const { error } = await supabaseAdmin.from("speakers").insert({
+            const { error } = await supabaseAdmin.from("speakers").insert({
         name: action.name,
         duration_minutes: action.duration_minutes,
         position: action.position,
+        notes: action.notes ?? "",
       });
       if (error) throw new Error(error.message);
       return { ok: true };
@@ -28,7 +29,8 @@ export const adminAction = createServerFn({ method: "POST" })
       if (action.name !== undefined) patch["name"] = action.name;
       if (action.duration_minutes !== undefined)
         patch["duration_minutes"] = action.duration_minutes;
-      if (action.position !== undefined) patch["position"] = action.position;
+            if (action.position !== undefined) patch["position"] = action.position;
+      if (action.notes !== undefined) patch["notes"] = action.notes;
       const { error } = await supabaseAdmin.from("speakers").update(patch as never).eq("id", action.id);
       if (error) throw new Error(error.message);
       return { ok: true };

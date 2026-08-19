@@ -231,6 +231,7 @@ function AdminPage() {
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
   const [message, setMessage] = useState("");
+    const [notes, setNotes] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const sensors = useSensors(
@@ -280,34 +281,38 @@ function AdminPage() {
       return;
     }
     if (editingId) {
-      const ok = await run({
+            const ok = await run({
         type: "updateSpeaker",
         id: editingId,
         name: parsed.data.name,
         duration_minutes: parsed.data.duration,
+        notes: notes.trim(),
       });
       if (!ok) return;
       toast.success("Speaker updated");
       setEditingId(null);
     } else {
       const nextPosition = speakers.length ? Math.max(...speakers.map((s) => s.position)) + 1 : 0;
-      const ok = await run({
+            const ok = await run({
         type: "addSpeaker",
         name: parsed.data.name,
         duration_minutes: parsed.data.duration,
         position: nextPosition,
+        notes: notes.trim(),
       });
       if (!ok) return;
       toast.success("Speaker added");
     }
-    setName("");
+        setName("");
     setDuration("20");
+    setNotes("");
   }
 
   function startEdit(speaker: Speaker) {
     setEditingId(speaker.id);
     setName(speaker.name);
     setDuration(String(speaker.duration_minutes));
+    setNotes(speaker.notes ?? "");
   }
 
   async function move(index: number, delta: number) {
@@ -491,10 +496,11 @@ function AdminPage() {
                 <button
                   type="button"
                   className={ghostButton}
-                  onClick={() => {
+                                    onClick={() => {
                     setEditingId(null);
                     setName("");
                     setDuration("20");
+                    setNotes("");
                   }}
                 >
                   Cancel

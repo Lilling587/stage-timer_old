@@ -83,7 +83,9 @@ const accentButton =
 
 type CsvRow = { name: string; minutes: number; notes: string };
 
-const CSV_TEMPLATE = "Name,Minutes,Notes\nExample Speaker,20,Optional notes here\n";
+const CSV_TEMPLATE =
+  "Talarens namn,Tid i minuter,Starttid\n" +
+  ",20,\n".repeat(10);
 
 function splitCsvLine(line: string) {
   const separator = line.split(";").length > line.split(",").length ? ";" : ",";
@@ -339,7 +341,7 @@ function AdminPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "speakers-template.csv";
+    link.download = "Talarlista.csv";
     link.click();
     URL.revokeObjectURL(url);
   }

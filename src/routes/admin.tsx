@@ -349,17 +349,20 @@ function AdminPage() {
     companyRow.getCell(2).value = "";
 
     const headerRow = sheet.getRow(3);
-    ["Talarens namn", "Tid i minuter", "Starttid"].forEach((label, i) => {
+        ["Talarens namn", "Tid i minuter", "Starttid"].forEach((label, i) => {
       const cell = headerRow.getCell(i + 1);
       cell.value = label;
       cell.font = { bold: true };
+      if (i === 2) cell.numFmt = "@";
     });
 
-    for (let r = 4; r <= 13; r += 1) {
+        for (let r = 4; r <= 13; r += 1) {
       const row = sheet.getRow(r);
       row.getCell(1).value = "";
       row.getCell(2).value = "";
-      row.getCell(3).value = "";
+      const timeCell = row.getCell(3);
+      timeCell.value = "";
+      timeCell.numFmt = "@";
     }
 
     const buffer = await workbook.xlsx.writeBuffer();

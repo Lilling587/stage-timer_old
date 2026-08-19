@@ -18,18 +18,20 @@ const statePatchSchema = z
 
 export const adminActionInputSchema = z.object({
   action: z.discriminatedUnion("type", [
-    z.object({
+        z.object({
       type: z.literal("addSpeaker"),
-      name: z.string().trim().max(80),
+      name: z.string().max(80),
       duration_minutes: z.number().int().min(1).max(600),
-      position: z.number().int().min(0).max(10000),
+      position: z.number(),
+      notes: z.string().max(500).optional(),
     }),
-    z.object({
+        z.object({
       type: z.literal("updateSpeaker"),
       id: z.string().uuid(),
-      name: z.string().trim().max(80).optional(),
+      name: z.string().max(80).optional(),
       duration_minutes: z.number().int().min(1).max(600).optional(),
-      position: z.number().int().min(0).max(10000).optional(),
+      position: z.number().optional(),
+      notes: z.string().max(500).optional(),
     }),
     z.object({ type: z.literal("deleteSpeaker"), id: z.string().uuid() }),
     z.object({

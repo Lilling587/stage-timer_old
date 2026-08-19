@@ -20,6 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 import { z } from "zod";
 import { StageScreen } from "@/components/StageScreen";
 import type { AdminActionInput } from "@/lib/admin-actions";
@@ -82,10 +83,6 @@ const accentButton =
   "rounded-lg bg-console-accent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-accent-fg transition-all hover:bg-console-accent-hover active:scale-95 disabled:pointer-events-none disabled:opacity-40";
 
 type CsvRow = { name: string; minutes: number; notes: string };
-
-const CSV_TEMPLATE =
-  "Talarens namn,Tid i minuter,Starttid\n" +
-  ",20,\n".repeat(10);
 
 function splitCsvLine(line: string) {
   const separator = line.split(";").length > line.split(",").length ? ";" : ",";
@@ -337,18 +334,28 @@ function AdminPage() {
   }
 
   function downloadTemplate() {
-    const blob = new Blob([CSV_TEMPLATE], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "Talarlista.csv";
-    link.click();
-    URL.revokeObjectURL(url);
+    const data = [
+      ["Talarens namn", "Tid i minuter", "Starttid"],
+      ...Array.from({ length: 10 }, () => ["", "", ""]),
+    ];
+    const sheet = XLSX.utils.aoa_to_sheet(data);
+    sheet["!cols"] = [{ wpx: 150 }, { wpx: 75 }, { wpx: 100 }];
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, sheet, "Talarlista");
+    XLSX.writeFile(book, "Talarlista.xlsx");
   }
 
   async function handleCsvFile(file: File) {
     try {
-      const text = await file.text();
+      let text: string;
+      if (file.name.toLowerCase().endsWith(".xlsx")) {
+        const buffer = await file.arrayBuffer();
+        const book = XLSX.read(buffer, { type: "array" });
+        const sheet = book.Sheets[book.SheetNames[0]!]!;
+        text = XLSX.utils.sheet_to_csv(sheet);
+      } else {
+        text = await file.text();
+      }
       const { rows, skipped } = parseSpeakerCsv(text);
       if (rows.length === 0) {
         toast.error("No valid rows found in that file. Check the template format.");
@@ -664,7 +671,7 @@ function AdminPage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv,text/csv"
+              accept=".csv,.xlsx,text/csv"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];

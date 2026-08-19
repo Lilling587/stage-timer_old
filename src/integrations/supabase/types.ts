@@ -20,6 +20,7 @@ export type Database = {
           duration_minutes: number
           id: string
           name: string
+          notes: string
           position: number
         }
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           duration_minutes?: number
           id?: string
           name: string
+          notes?: string
           position?: number
         }
         Update: {
@@ -34,6 +36,7 @@ export type Database = {
           duration_minutes?: number
           id?: string
           name?: string
+          notes?: string
           position?: number
         }
         Relationships: []

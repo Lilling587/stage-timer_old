@@ -360,22 +360,29 @@ function AdminPage() {
     }
   }
 
-  async function importCsvRows() {
+    async function importCsvRows() {
     if (!csvRows) return;
     setImporting(true);
-    let nextPosition = speakers.length ? Math.max(...speakers.map((s) => s.position)) + 1 : 0;
+    for (const speaker of speakers) {
+      await run({ type: "deleteSpeaker", id: speaker.id });
+    }
+    await patchState({
+      current_speaker_id: null,
+      status: "stopped",
+      elapsed_seconds: 0,
+      started_at: null,
+    });
     let imported = 0;
     for (const row of csvRows) {
       const ok = await run({
         type: "addSpeaker",
         name: row.name,
         duration_minutes: row.minutes,
-        position: nextPosition,
+        position: imported,
         notes: row.notes,
       });
       if (!ok) break;
       imported += 1;
-      nextPosition += 1;
     }
     setImporting(false);
     setCsvRows(null);

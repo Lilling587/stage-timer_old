@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -80,6 +80,58 @@ const ghostButton =
 
 const accentButton =
   "rounded-lg bg-console-accent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-accent-fg transition-all hover:bg-console-accent-hover active:scale-95 disabled:pointer-events-none disabled:opacity-40";
+
+type CsvRow = { name: string; minutes: number; notes: string };
+
+const CSV_TEMPLATE = "Name,Minutes,Notes\nExample Speaker,20,Optional notes here\n";
+
+function splitCsvLine(line: string) {
+  const separator = line.split(";").length > line.split(",").length ? ";" : ",";
+  const cells: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i]!;
+    if (char === '"') {
+      if (quoted && line[i + 1] === '"') {
+        cell += '"';
+        i += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === separator && !quoted) {
+      cells.push(cell);
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+  cells.push(cell);
+  return cells.map((value) => value.trim());
+}
+
+function parseSpeakerCsv(text: string): { rows: CsvRow[]; skipped: number } {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== "");
+  const rows: CsvRow[] = [];
+  let skipped = 0;
+  lines.slice(1).forEach((line) => {
+    const [rawName = "", rawMinutes = "", rawNotes = ""] = splitCsvLine(line);
+    const minutes = Number(rawMinutes.replace(",", "."));
+    if (!Number.isFinite(minutes) || !Number.isInteger(minutes) || minutes < 1 || minutes > 600) {
+      skipped += 1;
+      return;
+    }
+    rows.push({
+      name: rawName.slice(0, 80),
+      minutes,
+      notes: rawNotes.slice(0, 500),
+    });
+  });
+  return { rows, skipped };
+}
 
 type SpeakerCardProps = {
   speaker: Speaker;
@@ -239,6 +291,10 @@ function AdminPage() {
     const [notes, setNotes] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [csvRows, setCsvRows] = useState<CsvRow[] | null>(null);
+  const [csvSkipped, setCsvSkipped] = useState(0);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -278,6 +334,59 @@ function AdminPage() {
     });
   }
 
+  function downloadTemplate() {
+    const blob = new Blob([CSV_TEMPLATE], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "speakers-template.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleCsvFile(file: File) {
+    try {
+      const text = await file.text();
+      const { rows, skipped } = parseSpeakerCsv(text);
+      if (rows.length === 0) {
+        toast.error("No valid rows found in that file. Check the template format.");
+        setCsvRows(null);
+        return;
+      }
+      setCsvRows(rows);
+      setCsvSkipped(skipped);
+    } catch {
+      toast.error("We could not read that file.");
+    }
+  }
+
+  async function importCsvRows() {
+    if (!csvRows) return;
+    setImporting(true);
+    let nextPosition = speakers.length ? Math.max(...speakers.map((s) => s.position)) + 1 : 0;
+    let imported = 0;
+    for (const row of csvRows) {
+      const ok = await run({
+        type: "addSpeaker",
+        name: row.name,
+        duration_minutes: row.minutes,
+        position: nextPosition,
+        notes: row.notes,
+      });
+      if (!ok) break;
+      imported += 1;
+      nextPosition += 1;
+    }
+    setImporting(false);
+    setCsvRows(null);
+    setCsvSkipped(0);
+    await refresh();
+    toast.success(
+      `Imported ${imported} speaker${imported === 1 ? "" : "s"}` +
+        (csvSkipped > 0 ? ` — skipped ${csvSkipped} invalid row${csvSkipped === 1 ? "" : "s"}` : ""),
+    );
+  }
+
   async function submitSpeaker(e: React.FormEvent) {
     e.preventDefault();
     const parsed = speakerSchema.safeParse({ name, duration });
@@ -314,6 +423,7 @@ function AdminPage() {
   }
 
   function startEdit(speaker: Speaker) {
+    setCsvRows(null);
     setEditingId(speaker.id);
     setName(speaker.name);
     setDuration(String(speaker.duration_minutes));
@@ -525,6 +635,92 @@ function AdminPage() {
               ) : null}
             </div>
           </form>
+
+          <div className="rounded-xl border border-console-line bg-console-panel p-3">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-dim">
+              Bulk import
+            </p>
+            <div className="flex gap-2">
+              <button type="button" className={`flex-1 ${ghostButton}`} onClick={downloadTemplate}>
+                Download template
+              </button>
+              <button
+                type="button"
+                className={`flex-1 ${ghostButton}`}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Import CSV
+              </button>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) void handleCsvFile(file);
+              }}
+            />
+
+            {csvRows ? (
+              <div className="mt-3 rounded-lg border border-console-line bg-console-bg p-2">
+                <p className="mb-2 font-console-mono text-[10px] text-console-muted">
+                  {csvRows.length} row{csvRows.length === 1 ? "" : "s"} ready
+                  {csvSkipped > 0 ? ` · ${csvSkipped} skipped` : ""}
+                </p>
+                <div className="max-h-40 overflow-y-auto">
+                  <table className="w-full text-left text-[11px]">
+                    <thead>
+                      <tr className="text-[9px] uppercase tracking-[0.2em] text-console-dim">
+                        <th className="pb-1 font-bold">Name</th>
+                        <th className="pb-1 font-bold">Minutes</th>
+                        <th className="pb-1 font-bold">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {csvRows.map((row, i) => (
+                        <tr key={i} className="border-t border-console-line/60 align-top">
+                          <td className="py-1 pr-2 text-console-fg">
+                            {row.name.trim() === "" ? (
+                              <span className="italic text-console-muted">Unnamed</span>
+                            ) : (
+                              row.name
+                            )}
+                          </td>
+                          <td className="py-1 pr-2 font-console-mono text-console-muted">
+                            {row.minutes}
+                          </td>
+                          <td className="py-1 text-console-muted">{row.notes}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    disabled={importing}
+                    onClick={() => void importCsvRows()}
+                    className={`flex-1 ${accentButton}`}
+                  >
+                    {importing ? "Importing…" : `Import ${csvRows.length} speakers`}
+                  </button>
+                  <button
+                    type="button"
+                    className={ghostButton}
+                    onClick={() => {
+                      setCsvRows(null);
+                      setCsvSkipped(0);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           {speakers.length === 0 ? (
             <p className="px-1 text-xs text-console-muted">

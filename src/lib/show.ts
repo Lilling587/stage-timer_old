@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Speaker = {
-  export type Speaker = {
   id: string;
   name: string;
   notes: string;

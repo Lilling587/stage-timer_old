@@ -239,6 +239,10 @@ function AdminPage() {
     const [notes, setNotes] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [csvRows, setCsvRows] = useState<CsvRow[] | null>(null);
+  const [csvSkipped, setCsvSkipped] = useState(0);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),

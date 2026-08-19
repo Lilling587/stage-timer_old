@@ -151,9 +151,14 @@ function SpeakerCard({
                 speaker.name
               )}
             </h3>
-            <p className="mt-1 font-console-mono text-[10px] text-console-muted">
+                        <p className="mt-1 font-console-mono text-[10px] text-console-muted">
               {speaker.duration_minutes} min
             </p>
+            {speaker.notes ? (
+              <p className="mt-1 text-[10px] italic text-console-dim">
+                {speaker.notes}
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-col gap-1">

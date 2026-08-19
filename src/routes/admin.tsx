@@ -334,6 +334,59 @@ function AdminPage() {
     });
   }
 
+  function downloadTemplate() {
+    const blob = new Blob([CSV_TEMPLATE], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "speakers-template.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleCsvFile(file: File) {
+    try {
+      const text = await file.text();
+      const { rows, skipped } = parseSpeakerCsv(text);
+      if (rows.length === 0) {
+        toast.error("No valid rows found in that file. Check the template format.");
+        setCsvRows(null);
+        return;
+      }
+      setCsvRows(rows);
+      setCsvSkipped(skipped);
+    } catch {
+      toast.error("We could not read that file.");
+    }
+  }
+
+  async function importCsvRows() {
+    if (!csvRows) return;
+    setImporting(true);
+    let nextPosition = speakers.length ? Math.max(...speakers.map((s) => s.position)) + 1 : 0;
+    let imported = 0;
+    for (const row of csvRows) {
+      const ok = await run({
+        type: "addSpeaker",
+        name: row.name,
+        duration_minutes: row.minutes,
+        position: nextPosition,
+        notes: row.notes,
+      });
+      if (!ok) break;
+      imported += 1;
+      nextPosition += 1;
+    }
+    setImporting(false);
+    setCsvRows(null);
+    setCsvSkipped(0);
+    await refresh();
+    toast.success(
+      `Imported ${imported} speaker${imported === 1 ? "" : "s"}` +
+        (csvSkipped > 0 ? ` — skipped ${csvSkipped} invalid row${csvSkipped === 1 ? "" : "s"}` : ""),
+    );
+  }
+
   async function submitSpeaker(e: React.FormEvent) {
     e.preventDefault();
     const parsed = speakerSchema.safeParse({ name, duration });

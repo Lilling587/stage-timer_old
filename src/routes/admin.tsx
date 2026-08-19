@@ -334,7 +334,8 @@ function AdminPage() {
   }
 
   function downloadTemplate() {
-    const data = [
+        const data = [
+      ["Företag:", ""],
       ["Talarens namn", "Tid i minuter", "Starttid"],
       ...Array.from({ length: 10 }, () => ["", "", ""]),
     ];

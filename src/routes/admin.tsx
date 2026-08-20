@@ -1049,26 +1049,14 @@ function AdminPage() {
                     aria-label="Timer speed"
                     className="mb-3 w-full accent-[var(--console-accent)]"
                   />
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {SPEED_OPTIONS.map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => changeSpeed(option)}
-                        aria-pressed={rate === option}
-                        className={`flex flex-col items-center gap-0.5 rounded-xl border px-1 py-2 transition-all active:scale-95 ${
-                          rate === option
-                            ? "border-console-accent bg-console-accent/15 text-console-accent"
-                            : "border-console-line bg-console-bg text-console-fg hover:border-console-accent/40 hover:bg-console-panel"
-                        }`}
-                      >
-                        <span className="font-console-mono text-sm leading-none">{option}x</span>
-                        <span className="text-center text-[8px] leading-tight text-console-dim">
-                          {speedCaption(option)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => changeSpeed(1)}
+                    disabled={rate === 1}
+                    className={`w-full truncate ${ghostButton} disabled:cursor-not-allowed disabled:opacity-40`}
+                  >
+                    Reset speed to 1x
+                  </button>
                 </div>
               </div>
             </div>

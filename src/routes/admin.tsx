@@ -29,6 +29,10 @@ import { adminAction } from "@/lib/admin.functions";
 import {
   MESSAGE_TONES,
   SPEED_OPTIONS,
+  MIN_SPEED,
+  MAX_SPEED,
+  SPEED_STEP,
+  formatRate,
   decodeStageMessage,
   elapsedFor,
   encodeStageMessage,
@@ -949,7 +953,25 @@ function AdminPage() {
                 </div>
                 <div className="mt-3 flex items-center justify-end gap-3">
                   {current ? (
-                    <span
+                    <>
+                      <span className="text-right text-[10px] leading-tight text-console-dim">
+                        {rate === 1 ? (
+                          "Timer runs in real time"
+                        ) : (
+                          <>
+                            {formatRate(rate)}x speed
+                            <br />
+                            {formatClock(
+                              (displayMode === "elapsed"
+                                ? elapsedFor(state, now, speedSegments)
+                                : current.duration_minutes * 60 -
+                                  elapsedFor(state, now, speedSegments)) / rate,
+                            )}{" "}
+                            real time
+                          </>
+                        )}
+                      </span>
+                      <span
                       aria-label={
                         displayMode === "elapsed"
                           ? "Time elapsed for the speaker on stage"
@@ -974,7 +996,8 @@ function AdminPage() {
                           ? elapsedFor(state, now, speedSegments)
                           : current.duration_minutes * 60 - elapsedFor(state, now, speedSegments),
                       )}
-                    </span>
+                      </span>
+                    </>
                   ) : null}
                 </div>
               </div>
@@ -1005,9 +1028,27 @@ function AdminPage() {
                   </button>
                 </div>
                 <div className="mt-4 border-t border-console-line pt-3">
-                  <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-dim">
-                    Timer speed
-                  </p>
+                  <div className="mb-2 flex items-baseline justify-between gap-2">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-dim">
+                      Timer speed
+                    </p>
+                    <p className="font-console-mono text-xs text-console-accent">
+                      {formatRate(rate)}x
+                      <span className="ml-1.5 text-[9px] text-console-dim">
+                        {speedCaption(rate)}
+                      </span>
+                    </p>
+                  </div>
+                  <input
+                    type="range"
+                    min={MIN_SPEED}
+                    max={MAX_SPEED}
+                    step={SPEED_STEP}
+                    value={rate}
+                    onChange={(event) => changeSpeed(Number(event.target.value))}
+                    aria-label="Timer speed"
+                    className="mb-3 w-full accent-[var(--console-accent)]"
+                  />
                   <div className="grid grid-cols-5 gap-1.5">
                     {SPEED_OPTIONS.map((option) => (
                       <button

@@ -384,13 +384,24 @@ const ADJUSTMENTS_STORAGE = "stage-time-adjustments";
 /* ------------------------------------------------------------------ */
 
 export const SPEED_OPTIONS = [0.5, 1, 1.25, 1.5, 2] as const;
-export type SpeedRate = (typeof SPEED_OPTIONS)[number];
+export const MIN_SPEED = 0.25;
+export const MAX_SPEED = 4;
+export const SPEED_STEP = 0.05;
+/** Any speed between MIN_SPEED and MAX_SPEED; the presets are just shortcuts. */
+export type SpeedRate = number;
 
 const SPEED_CHANNEL = "stage-speed";
 
 function sanitizeRate(value: unknown): SpeedRate | null {
   const n = Number(value);
-  return (SPEED_OPTIONS as readonly number[]).includes(n) ? (n as SpeedRate) : null;
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const clamped = Math.min(MAX_SPEED, Math.max(MIN_SPEED, n));
+  return Math.round(clamped / SPEED_STEP) * SPEED_STEP;
+}
+
+/** Trim float noise so 1.2000000000000002 reads as 1.2. */
+export function formatRate(rate: number) {
+  return Number(rate.toFixed(2)).toString();
 }
 
 /** Human readable caption: how long one timer minute takes in real time. */

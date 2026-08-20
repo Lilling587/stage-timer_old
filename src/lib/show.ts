@@ -407,7 +407,6 @@ export const DEFAULT_QUICK_MESSAGES: QuickMessage[] = [
   { text: "Vänligen avrunda", tone: "info" },
   { text: "2 minuter kvar", tone: "warn" },
   { text: "Tiden är ute", tone: "stop" },
-  { text: "Frågor?", tone: "info" },
 ];
 
 function sanitizeQuickMessages(value: unknown): QuickMessage[] | null {

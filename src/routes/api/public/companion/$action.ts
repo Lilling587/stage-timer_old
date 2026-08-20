@@ -148,7 +148,9 @@ async function handle(request: Request, action: string) {
       remaining_seconds: Math.round(remaining),
       mmss: formatClock(remaining),
       tone: toneFor(remaining),
-      message: merged.message,
+      // Strip the tone marker so Companion shows the plain message text.
+      message: decodeStageMessage(merged.message).text || null,
+      message_tone: decodeStageMessage(merged.message).tone,
       blackout: merged.blackout ?? false,
       show_clock: merged.show_clock ?? false,
       display_mode: merged.display_mode ?? "remaining",

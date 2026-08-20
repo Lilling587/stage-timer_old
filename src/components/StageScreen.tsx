@@ -103,9 +103,7 @@ export function StageScreen({
     testMark: cueTest,
   });
 
-  if (state?.blackout && !compact) {
-    return <div className="relative flex h-full w-full bg-black" />;
-  }
+  const blackedOut = Boolean(state?.blackout) && !compact;
   return (
     <div
       className={`relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-stage-bg ${
@@ -157,6 +155,15 @@ export function StageScreen({
             {shownMessage.text}
           </p>
         </div>
+      ) : null}
+
+      {!compact ? (
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 z-30 bg-black transition-opacity duration-700 ease-in-out ${
+            blackedOut ? "opacity-100" : "opacity-0"
+          }`}
+        />
       ) : null}
     </div>
   );

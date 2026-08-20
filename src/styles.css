@@ -220,6 +220,21 @@
   animation: stage-message-in 0.35s ease-out;
 }
 
+@keyframes stage-message-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@utility stage-message-leaving {
+  animation: stage-message-out 0.6s ease-in forwards;
+}
+
 @keyframes blackout-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.15; }

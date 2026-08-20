@@ -953,7 +953,25 @@ function AdminPage() {
                 </div>
                 <div className="mt-3 flex items-center justify-end gap-3">
                   {current ? (
-                    <span
+                    <>
+                      <span className="text-right text-[10px] leading-tight text-console-dim">
+                        {rate === 1 ? (
+                          "Timer runs in real time"
+                        ) : (
+                          <>
+                            {formatRate(rate)}x speed
+                            <br />
+                            {formatClock(
+                              (displayMode === "elapsed"
+                                ? elapsedFor(state, now, speedSegments)
+                                : current.duration_minutes * 60 -
+                                  elapsedFor(state, now, speedSegments)) / rate,
+                            )}{" "}
+                            real time
+                          </>
+                        )}
+                      </span>
+                      <span
                       aria-label={
                         displayMode === "elapsed"
                           ? "Time elapsed for the speaker on stage"
@@ -978,7 +996,8 @@ function AdminPage() {
                           ? elapsedFor(state, now, speedSegments)
                           : current.duration_minutes * 60 - elapsedFor(state, now, speedSegments),
                       )}
-                    </span>
+                      </span>
+                    </>
                   ) : null}
                 </div>
               </div>

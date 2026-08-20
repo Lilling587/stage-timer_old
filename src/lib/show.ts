@@ -406,14 +406,13 @@ const INITIAL_SEGMENTS: SpeedSegment[] = [{ from: 0, rate: 1 }];
 
 function sanitizeSegments(value: unknown): SpeedSegment[] | null {
   if (!Array.isArray(value)) return null;
-  const cleaned = value
-    .map((entry) => {
-      const from = Number((entry as { from?: unknown })?.from);
-      const rate = sanitizeRate((entry as { rate?: unknown })?.rate);
-      return Number.isFinite(from) && rate ? { from, rate } : null;
-    })
-    .filter((entry): entry is SpeedSegment => entry !== null)
-    .sort((a, b) => a.from - b.from);
+  const cleaned: SpeedSegment[] = [];
+  for (const entry of value) {
+    const from = Number((entry as { from?: unknown })?.from);
+    const rate = sanitizeRate((entry as { rate?: unknown })?.rate);
+    if (Number.isFinite(from) && rate) cleaned.push({ from, rate });
+  }
+  cleaned.sort((a, b) => a.from - b.from);
   return cleaned.length ? cleaned : null;
 }
 

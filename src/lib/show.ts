@@ -27,11 +27,44 @@ export type SyncStatus = "connected" | "syncing" | "disconnected";
 
 export const STATE_ID = "main";
 
-export function elapsedFor(state: TimerState | null, now: number, rate = 1) {
+/**
+ * A speed change point: from this wall-clock moment onwards the timer runs at `rate`.
+ * Integrating over segments keeps speed changes seamless — seconds already counted
+ * always stay counted at the speed they were counted with.
+ */
+export type SpeedSegment = { from: number; rate: number };
+
+function integrateSpeed(startMs: number, endMs: number, speed: number | SpeedSegment[]) {
+  if (endMs <= startMs) return 0;
+  if (typeof speed === "number") return ((endMs - startMs) / 1000) * speed;
+  const segments = [...speed].sort((a, b) => a.from - b.from);
+  let total = 0;
+  let cursor = startMs;
+  let rate = 1;
+  for (const segment of segments) {
+    if (segment.from <= cursor) {
+      rate = segment.rate;
+      continue;
+    }
+    if (segment.from >= endMs) break;
+    total += ((segment.from - cursor) / 1000) * rate;
+    cursor = segment.from;
+    rate = segment.rate;
+  }
+  total += ((endMs - cursor) / 1000) * rate;
+  return total;
+}
+
+export function elapsedFor(
+  state: TimerState | null,
+  now: number,
+  speed: number | SpeedSegment[] = 1,
+) {
   if (!state) return 0;
   const base = state.elapsed_seconds ?? 0;
   if (state.status === "running" && state.started_at) {
-    return base + Math.max(0, (now - new Date(state.started_at).getTime()) / 1000) * rate;
+    const startedAt = new Date(state.started_at).getTime();
+    return base + Math.max(0, integrateSpeed(startedAt, now, speed));
   }
   return base;
 }
@@ -369,16 +402,30 @@ export function speedCaption(rate: SpeedRate) {
     : `1 min = ${seconds} s real`;
 }
 
+const INITIAL_SEGMENTS: SpeedSegment[] = [{ from: 0, rate: 1 }];
+
+function sanitizeSegments(value: unknown): SpeedSegment[] | null {
+  if (!Array.isArray(value)) return null;
+  const cleaned: SpeedSegment[] = [];
+  for (const entry of value) {
+    const from = Number((entry as { from?: unknown })?.from);
+    const rate = sanitizeRate((entry as { rate?: unknown })?.rate);
+    if (Number.isFinite(from) && rate) cleaned.push({ from, rate });
+  }
+  cleaned.sort((a, b) => a.from - b.from);
+  return cleaned.length ? cleaned : null;
+}
+
 /** Stage side: follows the speed chosen in the control room. Always starts at 1x. */
 export function useStageSpeed() {
-  const [rate, setRate] = useState<SpeedRate>(1);
+  const [segments, setSegments] = useState<SpeedSegment[]>(INITIAL_SEGMENTS);
 
   useEffect(() => {
     const channel = supabase.channel(SPEED_CHANNEL);
     channel
       .on("broadcast", { event: "set" }, ({ payload }) => {
-        const next = sanitizeRate((payload as { rate?: unknown })?.rate);
-        if (next) setRate(next);
+        const next = sanitizeSegments((payload as { segments?: unknown })?.segments);
+        if (next) setSegments(next);
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -390,7 +437,8 @@ export function useStageSpeed() {
     };
   }, []);
 
-  return rate;
+  const rate = (segments[segments.length - 1]?.rate ?? 1) as SpeedRate;
+  return { rate, segments };
 }
 
 /**
@@ -398,8 +446,8 @@ export function useStageSpeed() {
  * Deliberately not persisted — every fresh load starts at real time.
  */
 export function useSpeedControl() {
-  const [rate, setRate] = useState<SpeedRate>(1);
-  const rateRef = useRef<SpeedRate>(1);
+  const [segments, setSegments] = useState<SpeedSegment[]>(INITIAL_SEGMENTS);
+  const segmentsRef = useRef<SpeedSegment[]>(INITIAL_SEGMENTS);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
@@ -407,14 +455,18 @@ export function useSpeedControl() {
     channelRef.current = channel;
     channel
       .on("broadcast", { event: "set" }, ({ payload }) => {
-        const next = sanitizeRate((payload as { rate?: unknown })?.rate);
+        const next = sanitizeSegments((payload as { segments?: unknown })?.segments);
         if (next) {
-          rateRef.current = next;
-          setRate(next);
+          segmentsRef.current = next;
+          setSegments(next);
         }
       })
       .on("broadcast", { event: "request" }, () => {
-        void channel.send({ type: "broadcast", event: "set", payload: { rate: rateRef.current } });
+        void channel.send({
+          type: "broadcast",
+          event: "set",
+          payload: { segments: segmentsRef.current },
+        });
       })
       .subscribe();
     return () => {
@@ -425,12 +477,20 @@ export function useSpeedControl() {
 
   const setSpeed = useCallback((next: SpeedRate) => {
     const safe = sanitizeRate(next) ?? 1;
-    rateRef.current = safe;
-    setRate(safe);
-    void channelRef.current?.send({ type: "broadcast", event: "set", payload: { rate: safe } });
+    const previous = segmentsRef.current;
+    if ((previous[previous.length - 1]?.rate ?? 1) === safe) return;
+    const updated = [...previous, { from: Date.now(), rate: safe }].slice(-200);
+    segmentsRef.current = updated;
+    setSegments(updated);
+    void channelRef.current?.send({
+      type: "broadcast",
+      event: "set",
+      payload: { segments: updated },
+    });
   }, []);
 
-  return { rate, setSpeed };
+  const rate = (segments[segments.length - 1]?.rate ?? 1) as SpeedRate;
+  return { rate, segments, setSpeed };
 }
 
 export const DEFAULT_ADJUSTMENTS = [-5, -1, 1, 5];

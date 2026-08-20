@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Maximize2, Minimize2, Wifi, WifiOff } from "lucide-react";
 import { StageScreen } from "@/components/StageScreen";
-import { useNow, useShow, useStageCueSettings, useStageThresholds } from "@/lib/show";
+import { useNow, useShow, useStageCueSettings, useStageSpeed, useStageThresholds } from "@/lib/show";
 
 export const Route = createFileRoute("/stage")({
   head: () => ({
@@ -28,6 +28,7 @@ function StagePage() {
   const displayMode = (state?.display_mode as "remaining" | "elapsed") ?? "remaining";
   const thresholds = useStageThresholds();
   const { cue, testMark } = useStageCueSettings();
+  const rate = useStageSpeed();
   const now = useNow(true);
   const speaker = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;
 
@@ -139,6 +140,7 @@ function StagePage() {
         thresholds={thresholds}
         cue={cue}
         cueTest={testMark}
+        rate={rate}
       />
       <div
         role="status"

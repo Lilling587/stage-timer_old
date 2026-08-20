@@ -27,11 +27,11 @@ export type SyncStatus = "connected" | "syncing" | "disconnected";
 
 export const STATE_ID = "main";
 
-export function elapsedFor(state: TimerState | null, now: number) {
+export function elapsedFor(state: TimerState | null, now: number, rate = 1) {
   if (!state) return 0;
   const base = state.elapsed_seconds ?? 0;
   if (state.status === "running" && state.started_at) {
-    return base + Math.max(0, (now - new Date(state.started_at).getTime()) / 1000);
+    return base + Math.max(0, (now - new Date(state.started_at).getTime()) / 1000) * rate;
   }
   return base;
 }
@@ -345,6 +345,94 @@ export function useThresholdControl() {
 }
 
 const ADJUSTMENTS_STORAGE = "stage-time-adjustments";
+
+/* ------------------------------------------------------------------ */
+/* Timer speed (rehearsal tool, control room only)                     */
+/* ------------------------------------------------------------------ */
+
+export const SPEED_OPTIONS = [0.5, 1, 1.25, 1.5, 2] as const;
+export type SpeedRate = (typeof SPEED_OPTIONS)[number];
+
+const SPEED_CHANNEL = "stage-speed";
+
+function sanitizeRate(value: unknown): SpeedRate | null {
+  const n = Number(value);
+  return (SPEED_OPTIONS as readonly number[]).includes(n) ? (n as SpeedRate) : null;
+}
+
+/** Human readable caption: how long one timer minute takes in real time. */
+export function speedCaption(rate: SpeedRate) {
+  if (rate === 1) return "real time";
+  const seconds = Math.round(60 / rate);
+  return seconds % 60 === 0
+    ? `1 min = ${seconds / 60} min real`
+    : `1 min = ${seconds} s real`;
+}
+
+/** Stage side: follows the speed chosen in the control room. Always starts at 1x. */
+export function useStageSpeed() {
+  const [rate, setRate] = useState<SpeedRate>(1);
+
+  useEffect(() => {
+    const channel = supabase.channel(SPEED_CHANNEL);
+    channel
+      .on("broadcast", { event: "set" }, ({ payload }) => {
+        const next = sanitizeRate((payload as { rate?: unknown })?.rate);
+        if (next) setRate(next);
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.send({ type: "broadcast", event: "request", payload: {} });
+        }
+      });
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return rate;
+}
+
+/**
+ * Control room side: owns the timer speed and pushes it to every stage screen.
+ * Deliberately not persisted — every fresh load starts at real time.
+ */
+export function useSpeedControl() {
+  const [rate, setRate] = useState<SpeedRate>(1);
+  const rateRef = useRef<SpeedRate>(1);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  useEffect(() => {
+    const channel = supabase.channel(SPEED_CHANNEL);
+    channelRef.current = channel;
+    channel
+      .on("broadcast", { event: "set" }, ({ payload }) => {
+        const next = sanitizeRate((payload as { rate?: unknown })?.rate);
+        if (next) {
+          rateRef.current = next;
+          setRate(next);
+        }
+      })
+      .on("broadcast", { event: "request" }, () => {
+        void channel.send({ type: "broadcast", event: "set", payload: { rate: rateRef.current } });
+      })
+      .subscribe();
+    return () => {
+      channelRef.current = null;
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const setSpeed = useCallback((next: SpeedRate) => {
+    const safe = sanitizeRate(next) ?? 1;
+    rateRef.current = safe;
+    setRate(safe);
+    void channelRef.current?.send({ type: "broadcast", event: "set", payload: { rate: safe } });
+  }, []);
+
+  return { rate, setSpeed };
+}
+
 export const DEFAULT_ADJUSTMENTS = [-5, -1, 1, 5];
 
 export function useAdjustmentSettings() {

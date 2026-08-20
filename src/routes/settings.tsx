@@ -353,23 +353,37 @@ function SettingsPage() {
                 { key: "atDanger", label: `At danger (${thresholds.dangerMinutes} min left)` },
                 { key: "atZero", label: "When time is up" },
               ] as const
-            ).map((row) => (
-              <label
-                key={row.key}
-                className="flex items-center justify-between gap-3 rounded-lg border border-console-line bg-console-bg px-3 py-2 text-sm"
-              >
-                <span className={row.key === "enabled" ? "font-bold" : "text-console-muted"}>
-                  {row.label}
-                </span>
-                <input
-                  type="checkbox"
-                  checked={cue[row.key]}
-                  disabled={row.key !== "enabled" && !cue.enabled}
-                  onChange={(e) => setCue({ ...cue, [row.key]: e.target.checked })}
-                  className="h-4 w-4 accent-[var(--console-accent)]"
-                />
-              </label>
-            ))}
+            ).map((row) => {
+              const disabled = row.key !== "enabled" && !cue.enabled;
+              const checked = cue[row.key];
+              return (
+                <div
+                  key={row.key}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-console-line bg-console-bg px-3 py-2 text-sm"
+                >
+                  <span className={row.key === "enabled" ? "font-bold" : "text-console-muted"}>
+                    {row.label}
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={checked}
+                    aria-label={row.label}
+                    disabled={disabled}
+                    onClick={() => setCue({ ...cue, [row.key]: !checked })}
+                    className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-40 ${
+                      checked ? "bg-console-accent" : "bg-console-raised"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 h-4 w-4 rounded-full bg-console-fg transition-all ${
+                        checked ? "right-1" : "left-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              );
+            })}
             <div className="flex items-center justify-between gap-3 rounded-lg border border-console-line bg-console-bg px-3 py-2">
               <span className="text-sm text-console-muted">Intensity</span>
               <span className="flex gap-1">

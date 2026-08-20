@@ -1,8 +1,14 @@
 import {
   DEFAULT_THRESHOLDS,
+  CUE_INTENSITY_OPACITY,
+  DEFAULT_CUE_SETTINGS,
+  decodeStageMessage,
   elapsedFor,
   formatClock,
   toneFor,
+  useCueFlash,
+  type CueMark,
+  type CueSettings,
   type Speaker,
   type Thresholds,
   type TimerState,
@@ -15,6 +21,18 @@ const toneClass = {
   over: "text-stage-danger stage-flashing",
 } as const;
 
+const messageToneClass = {
+  info: "border-t-4 border-stage-fg/30 bg-stage-fg/10 text-stage-fg",
+  warn: "border-t-4 border-stage-warn bg-stage-warn/20 text-stage-warn",
+  stop: "border-t-4 border-stage-danger bg-stage-danger/25 text-stage-danger",
+} as const;
+
+const cueColor: Record<CueMark, string> = {
+  warn: "var(--stage-warn)",
+  danger: "var(--stage-danger)",
+  over: "var(--stage-danger)",
+};
+
 export function StageScreen({
   speaker,
   state,
@@ -22,6 +40,8 @@ export function StageScreen({
   compact = false,
   showElapsed = false,
   thresholds = DEFAULT_THRESHOLDS,
+  cue = DEFAULT_CUE_SETTINGS,
+  cueTest = null,
 }: {
   speaker: Speaker | null;
   state: TimerState | null;
@@ -29,9 +49,11 @@ export function StageScreen({
   compact?: boolean;
   showElapsed?: boolean;
   thresholds?: Thresholds;
+  cue?: CueSettings;
+  cueTest?: { mark: CueMark; at: number } | null;
 }) {
-  const message = state?.message ?? null;
-  const messageVisible = Boolean(message);
+  const { text: messageText, tone: messageTone } = decodeStageMessage(state?.message);
+  const messageVisible = messageText.length > 0;
   const showClock = state?.show_clock ?? false;
   const wallClock = new Date(now).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
 
@@ -44,6 +66,15 @@ export function StageScreen({
     tone === "over" && (!isRunning || !thresholds.blinkOnOver)
       ? "text-stage-danger"
       : toneClass[tone];
+
+  const flash = useCueFlash({
+    remaining,
+    running: isRunning,
+    speakerId: speaker?.id ?? null,
+    cue,
+    thresholds,
+    testMark: cueTest,
+  });
 
   if (state?.blackout && !compact) {
     return <div className="relative flex h-full w-full bg-black" />;
@@ -76,14 +107,27 @@ export function StageScreen({
             : "00:00"}
       </p>
 
-      {messageVisible && message ? (
+      {flash ? (
         <div
-          className={`stage-message absolute inset-x-0 bottom-6 bg-stage-fg/10 text-center backdrop-blur ${
+          aria-hidden="true"
+          className="stage-cue-flash pointer-events-none absolute inset-0 z-10"
+          style={{
+            backgroundColor: cueColor[flash],
+            ["--cue-opacity" as string]: String(CUE_INTENSITY_OPACITY[cue.intensity]),
+          }}
+        />
+      ) : null}
+
+      {messageVisible ? (
+        <div
+          className={`stage-message absolute inset-x-0 bottom-6 z-20 text-center backdrop-blur ${
+            messageToneClass[messageTone]
+          } ${
             compact ? "px-3 py-2" : "px-10 py-8"
           }`}
         >
-          <p className={`font-medium text-stage-fg ${compact ? "text-xs" : "text-[3vw]"}`}>
-            {message}
+          <p className={`font-medium ${compact ? "text-xs" : "text-[3vw]"}`}>
+            {messageText}
           </p>
         </div>
       ) : null}

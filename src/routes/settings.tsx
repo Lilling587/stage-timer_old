@@ -238,13 +238,40 @@ function SettingsPage() {
             ) : (
               quickMessages.map((msg, i) => (
                 <li
-                  key={`${msg}-${i}`}
+                  key={`${msg.text}-${i}`}
                   className="flex items-center justify-between gap-3 rounded-lg border border-console-line bg-console-bg px-3 py-2"
                 >
-                  <span className="truncate text-sm text-console-fg">{msg}</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${toneDot[msg.tone]}`} />
+                    <span className="truncate text-sm text-console-fg">{msg.text}</span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1">
+                    {MESSAGE_TONES.map((t) => (
+                      <button
+                        key={t.value}
+                        type="button"
+                        aria-pressed={msg.tone === t.value}
+                        aria-label={`Set tone ${t.label} for ${msg.text}`}
+                        onClick={() =>
+                          setQuickMessages(
+                            quickMessages.map((m, idx) =>
+                              idx === i ? { ...m, tone: t.value } : m,
+                            ),
+                          )
+                        }
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] transition-colors ${
+                          msg.tone === t.value
+                            ? "bg-console-accent text-console-accent-fg"
+                            : "text-console-dim hover:bg-console-raised hover:text-console-fg"
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </span>
                   <button
                     type="button"
-                    aria-label={`Delete quick message ${msg}`}
+                    aria-label={`Delete quick message ${msg.text}`}
                     onClick={() => setQuickMessages(quickMessages.filter((_, idx) => idx !== i))}
                     className="shrink-0 rounded-md px-2 py-0.5 text-sm text-console-muted transition-colors hover:bg-console-raised hover:text-console-danger"
                   >
@@ -269,6 +296,23 @@ function SettingsPage() {
               aria-label="New quick message"
               className={fieldClass}
             />
+            <span className="flex shrink-0 items-center gap-1">
+              {MESSAGE_TONES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  aria-pressed={draftTone === t.value}
+                  onClick={() => setDraftTone(t.value)}
+                  className={`rounded-md px-2 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] transition-colors ${
+                    draftTone === t.value
+                      ? "bg-console-accent text-console-accent-fg"
+                      : "border border-console-line text-console-dim hover:bg-console-raised hover:text-console-fg"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </span>
             <button
               type="button"
               onClick={addQuickMessage}
@@ -277,6 +321,76 @@ function SettingsPage() {
             >
               Add
             </button>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-console-line bg-console-surface p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
+              Cue flash
+            </h2>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => testCue("over")} className={ghostButton}>
+                Test flash
+              </button>
+              <button
+                type="button"
+                onClick={() => setCue(DEFAULT_CUE_SETTINGS)}
+                className={ghostButton}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+          <p className="mb-3 text-[11px] text-console-dim">
+            A short full-screen pulse on the stage the moment the countdown passes a cue mark.
+          </p>
+          <div className="flex flex-col gap-2">
+            {(
+              [
+                { key: "enabled", label: "Cue flash enabled" },
+                { key: "atWarn", label: `At warning (${thresholds.warnMinutes} min left)` },
+                { key: "atDanger", label: `At danger (${thresholds.dangerMinutes} min left)` },
+                { key: "atZero", label: "When time is up" },
+              ] as const
+            ).map((row) => (
+              <label
+                key={row.key}
+                className="flex items-center justify-between gap-3 rounded-lg border border-console-line bg-console-bg px-3 py-2 text-sm"
+              >
+                <span className={row.key === "enabled" ? "font-bold" : "text-console-muted"}>
+                  {row.label}
+                </span>
+                <input
+                  type="checkbox"
+                  checked={cue[row.key]}
+                  disabled={row.key !== "enabled" && !cue.enabled}
+                  onChange={(e) => setCue({ ...cue, [row.key]: e.target.checked })}
+                  className="h-4 w-4 accent-[var(--console-accent)]"
+                />
+              </label>
+            ))}
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-console-line bg-console-bg px-3 py-2">
+              <span className="text-sm text-console-muted">Intensity</span>
+              <span className="flex gap-1">
+                {CUE_INTENSITIES.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={cue.intensity === option.value}
+                    disabled={!cue.enabled}
+                    onClick={() => setCue({ ...cue, intensity: option.value })}
+                    className={`rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] transition-colors disabled:opacity-40 ${
+                      cue.intensity === option.value
+                        ? "bg-console-accent text-console-accent-fg"
+                        : "border border-console-line text-console-dim hover:bg-console-raised hover:text-console-fg"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </span>
+            </div>
           </div>
         </section>
 

@@ -288,10 +288,12 @@ function AdminPage() {
   const { thresholds } = useThresholdControl();
   const { adjustments } = useAdjustmentSettings();
   const { quickMessages } = useQuickMessages();
+  const { cue, testMark } = useCueControl();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState<MessageTone>("info");
     const [notes, setNotes] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);

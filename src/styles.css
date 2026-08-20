@@ -77,6 +77,7 @@
   --color-console-accent-hover: var(--console-accent-hover);
   --color-console-accent-fg: var(--console-accent-fg);
   --color-console-danger: var(--console-danger);
+  --color-console-warn: var(--console-warn);
   --color-console-ok: var(--console-ok);
   --font-sora: 'Sora', sans-serif;
   --font-manrope: 'Manrope', sans-serif;
@@ -140,6 +141,7 @@
   --console-accent-hover: oklch(0.71 0.17 39.5);
   --console-accent-fg: oklch(0.99 0 0);
   --console-danger: oklch(0.62 0.21 27);
+  --console-warn: oklch(0.78 0.16 78);
   --console-ok: oklch(0.72 0.18 148);
 }
 
@@ -225,4 +227,24 @@
 
 .blackout-blink {
   animation: blackout-blink 3s ease-in-out infinite;
+}
+
+/* Cue flash: two short pulses at a cue mark, then straight back to normal. */
+@keyframes stage-cue-pulse {
+  0% { opacity: 0; }
+  12% { opacity: var(--cue-opacity, 0.5); }
+  30% { opacity: 0; }
+  48% { opacity: var(--cue-opacity, 0.5); }
+  70%, 100% { opacity: 0; }
+}
+
+.stage-cue-flash {
+  opacity: 0;
+  animation: stage-cue-pulse 1.4s ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-cue-flash {
+    animation-duration: 1.4s;
+  }
 }

@@ -27,18 +27,29 @@ import { StageScreen } from "@/components/StageScreen";
 import type { AdminActionInput } from "@/lib/admin-actions";
 import { adminAction } from "@/lib/admin.functions";
 import {
+  MESSAGE_TONES,
+  decodeStageMessage,
   elapsedFor,
+  encodeStageMessage,
   formatClock,
   toneFor,
   useAdjustmentSettings,
   useAdminPresence,
+  useCueControl,
   useDisplayModeControl,
   useNow,
   useQuickMessages,
   useShow,
   useThresholdControl,
+  type MessageTone,
   type Speaker,
 } from "@/lib/show";
+
+const toneDot: Record<MessageTone, string> = {
+  info: "bg-console-muted",
+  warn: "bg-console-warn",
+  stop: "bg-console-danger",
+};
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -288,10 +299,13 @@ function AdminPage() {
   const { thresholds } = useThresholdControl();
   const { adjustments } = useAdjustmentSettings();
   const { quickMessages } = useQuickMessages();
+  const { cue, testMark } = useCueControl();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState<MessageTone>("info");
+  const liveMessage = decodeStageMessage(state?.message);
     const [notes, setNotes] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
@@ -579,7 +593,10 @@ function AdminPage() {
       toast.error(parsed.error.issues[0]?.message ?? "Check the message");
       return;
     }
-    await patchState({ message: parsed.data, message_sent_at: new Date().toISOString() });
+    await patchState({
+      message: encodeStageMessage(parsed.data, messageTone),
+      message_sent_at: new Date().toISOString(),
+    });
     setMessage("");
     toast.success("Message sent to stage");
   }
@@ -890,6 +907,8 @@ function AdminPage() {
                   now={now}
                   showElapsed={displayMode === "elapsed"}
                   thresholds={thresholds}
+                  cue={cue}
+                  cueTest={testMark}
                 />
               </div>
               <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2">
@@ -1003,31 +1022,55 @@ function AdminPage() {
                 </h2>
               </div>
               <div className="flex-1 p-4">
-                {state?.message ? (
+                {liveMessage.text ? (
                   <div className="mb-3 rounded-xl border border-console-accent/30 bg-console-accent/10 px-3 py-2 text-xs text-console-accent">
-                    <span className="font-bold uppercase tracking-[0.2em]">Live on stage</span>
-                    <p className="mt-1 italic text-console-fg">"{state.message}"</p>
+                    <span className="font-bold uppercase tracking-[0.2em]">
+                      Live on stage · {liveMessage.tone}
+                    </span>
+                    <p className="mt-1 italic text-console-fg">"{liveMessage.text}"</p>
                   </div>
                 ) : null}
+                <div className="mb-3 flex gap-2">
+                  {MESSAGE_TONES.map((t) => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      aria-pressed={messageTone === t.value}
+                      onClick={() => setMessageTone(t.value)}
+                      className={`flex-1 rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] transition-all active:scale-95 ${
+                        messageTone === t.value
+                          ? "bg-console-accent text-console-accent-fg"
+                          : "border border-console-line text-console-muted hover:bg-console-raised hover:text-console-fg"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
                 {quickMessages.length > 0 ? (
                   <div className="mb-3 flex flex-wrap gap-2">
                     {quickMessages.map((quick, i) => {
-                      const active = state?.message === quick;
+                      const encoded = encodeStageMessage(quick.text, quick.tone);
+                      const active = state?.message === encoded;
                       return (
                         <button
-                          key={`${quick}-${i}`}
+                          key={`${quick.text}-${i}`}
                           type="button"
                           aria-pressed={active}
                           onClick={() =>
-                            patchState({ message: quick, message_sent_at: new Date().toISOString() })
+                            patchState({
+                              message: encoded,
+                              message_sent_at: new Date().toISOString(),
+                            })
                           }
-                          className={`max-w-[14rem] truncate rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] transition-all active:scale-95 ${
+                          className={`flex max-w-[14rem] items-center gap-2 rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] transition-all active:scale-95 ${
                             active
                               ? "bg-console-accent text-console-accent-fg hover:bg-console-accent-hover"
                               : "border border-console-line text-console-muted hover:bg-console-raised hover:text-console-fg"
                           }`}
                         >
-                          {quick}
+                          <span className={`h-2 w-2 shrink-0 rounded-full ${toneDot[quick.tone]}`} />
+                          <span className="truncate">{quick.text}</span>
                         </button>
                       );
                     })}

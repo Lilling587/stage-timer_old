@@ -51,6 +51,18 @@ function formatClock(totalSeconds: number) {
 }
 
 function toneFor(remaining: number) {
+  return remainingTone(remaining);
+}
+
+/** Messages may carry a tone marker such as `[[warn]]`; Companion wants it split out. */
+function decodeStageMessage(raw: string | null | undefined) {
+  if (!raw) return { text: "", tone: "info" as const };
+  const match = /^\[\[(info|warn|stop)\]\]/.exec(raw);
+  if (!match) return { text: raw, tone: "info" as const };
+  return { text: raw.slice(match[0].length), tone: match[1] as "info" | "warn" | "stop" };
+}
+
+function remainingTone(remaining: number) {
   if (remaining <= 0) return "over";
   if (remaining < 120) return "danger";
   if (remaining < 300) return "warn";
@@ -148,7 +160,9 @@ async function handle(request: Request, action: string) {
       remaining_seconds: Math.round(remaining),
       mmss: formatClock(remaining),
       tone: toneFor(remaining),
-      message: merged.message,
+      // Strip the tone marker so Companion shows the plain message text.
+      message: decodeStageMessage(merged.message).text || null,
+      message_tone: decodeStageMessage(merged.message).tone,
       blackout: merged.blackout ?? false,
       show_clock: merged.show_clock ?? false,
       display_mode: merged.display_mode ?? "remaining",

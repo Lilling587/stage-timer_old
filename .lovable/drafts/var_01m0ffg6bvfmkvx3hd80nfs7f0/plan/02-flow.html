@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 250" width="640" height="250">
+<style>
+text{font-family:var(--font-sans);fill:hsl(var(--foreground));font-size:12px}
+.lbl{font-size:14px;font-weight:480}
+.n{fill:hsl(var(--muted-foreground));font-size:12px}
+.b{fill:none;stroke:hsl(var(--muted-foreground));stroke-width:1}
+.w{stroke:hsl(var(--muted-foreground));stroke-width:1;fill:none}
+.a{fill:none;stroke:hsl(var(--accent));stroke-width:1}
+</style>
+<defs><marker id="c" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="hsl(var(--muted-foreground))"/></marker></defs>
+
+<rect class="a" x="20" y="30" width="150" height="52" rx="8"/>
+<text class="lbl" x="95" y="52" text-anchor="middle" fill="hsl(var(--accent-foreground))">Speed control</text>
+<text class="n" x="95" y="70" text-anchor="middle">/admin · 0.5x – 2x</text>
+
+<line class="w" x1="170" y1="56" x2="245" y2="56" marker-end="url(#c)"/>
+
+<rect class="b" x="245" y="30" width="170" height="52" rx="8"/>
+<text class="lbl" x="330" y="52" text-anchor="middle">Broadcast channel</text>
+<text class="n" x="330" y="70" text-anchor="middle">same path as thresholds</text>
+
+<line class="w" x1="415" y1="56" x2="490" y2="56" marker-end="url(#c)"/>
+
+<rect class="b" x="490" y="30" width="130" height="52" rx="8"/>
+<text class="lbl" x="555" y="52" text-anchor="middle">elapsedFor()</text>
+<text class="n" x="555" y="70" text-anchor="middle">× rate</text>
+
+<line class="w" x1="555" y1="82" x2="555" y2="118" marker-end="url(#c)"/>
+<rect class="b" x="470" y="120" width="150" height="46" rx="8"/>
+<text class="lbl" x="545" y="148" text-anchor="middle">Stage · preview · admin</text>
+
+<rect class="b" x="20" y="120" width="400" height="100" rx="8" stroke-dasharray="4 3" stroke="hsl(var(--border))"/>
+<text class="n" x="36" y="142">banked seconds</text>
+<circle cx="42" cy="166" r="9" fill="hsl(var(--accent))"/><text x="42" y="170" text-anchor="middle" font-size="11" fill="hsl(var(--accent-foreground))">1</text>
+<text class="n" x="60" y="170">changing speed writes the seconds counted so far</text>
+<circle cx="42" cy="196" r="9" fill="hsl(var(--accent))"/><text x="42" y="200" text-anchor="middle" font-size="11" fill="hsl(var(--accent-foreground))">2</text>
+<text class="n" x="60" y="200">and restarts the stopwatch — no visible jump</text>
+</svg>

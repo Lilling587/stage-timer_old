@@ -304,6 +304,7 @@ function AdminPage() {
   const { adjustments } = useAdjustmentSettings();
   const { quickMessages } = useQuickMessages();
   const { cue, testMark } = useCueControl();
+  const { rate, setSpeed } = useSpeedControl();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
@@ -567,9 +568,21 @@ function AdminPage() {
     if (state?.status !== "running") return;
     await patchState({
       status: "paused",
-      elapsed_seconds: Math.round(elapsedFor(state, Date.now())),
+      elapsed_seconds: Math.round(elapsedFor(state, Date.now(), rate)),
       started_at: null,
     });
+  }
+
+  // Bank the seconds already counted at the old speed so the clock never jumps.
+  async function changeSpeed(next: SpeedRate) {
+    if (next === rate) return;
+    if (state?.status === "running") {
+      await patchState({
+        elapsed_seconds: Math.round(elapsedFor(state, Date.now(), rate)),
+        started_at: new Date().toISOString(),
+      });
+    }
+    setSpeed(next);
   }
 
   async function reset() {

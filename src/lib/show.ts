@@ -372,26 +372,76 @@ export function useAdjustmentSettings() {
 }
 
 const QUICK_MESSAGES_STORAGE = "stage-quick-messages";
-export const DEFAULT_QUICK_MESSAGES = [
-  "Vänligen avrunda",
-  "2 minuter kvar",
-  "Tiden är ute",
-  "Frågor?",
+
+export type MessageTone = "info" | "warn" | "stop";
+export type QuickMessage = { text: string; tone: MessageTone };
+
+export const MESSAGE_TONES: { value: MessageTone; label: string }[] = [
+  { value: "info", label: "Info" },
+  { value: "warn", label: "Warning" },
+  { value: "stop", label: "Stop" },
 ];
 
+/**
+ * The tone travels inside the stored message text as a short marker, so every
+ * screen and the Companion API stay on the single `timer_state.message` field.
+ * Plain text (e.g. sent from Companion) reads as the neutral "info" tone.
+ */
+const TONE_MARKER = /^\[\[(info|warn|stop)\]\]/;
+
+export function encodeStageMessage(text: string, tone: MessageTone) {
+  return tone === "info" ? text : `[[${tone}]]${text}`;
+}
+
+export function decodeStageMessage(raw: string | null | undefined): {
+  text: string;
+  tone: MessageTone;
+} {
+  if (!raw) return { text: "", tone: "info" };
+  const match = TONE_MARKER.exec(raw);
+  if (!match) return { text: raw, tone: "info" };
+  return { text: raw.slice(match[0].length), tone: match[1] as MessageTone };
+}
+
+export const DEFAULT_QUICK_MESSAGES: QuickMessage[] = [
+  { text: "Vänligen avrunda", tone: "info" },
+  { text: "2 minuter kvar", tone: "warn" },
+  { text: "Tiden är ute", tone: "stop" },
+  { text: "Frågor?", tone: "info" },
+];
+
+function sanitizeQuickMessages(value: unknown): QuickMessage[] | null {
+  if (!Array.isArray(value)) return null;
+  const out: QuickMessage[] = [];
+  for (const item of value) {
+    // Older versions stored plain strings; keep them and default to info.
+    if (typeof item === "string") {
+      out.push({ text: item, tone: "info" });
+      continue;
+    }
+    const row = item as Partial<QuickMessage>;
+    if (typeof row?.text !== "string") return null;
+    const tone: MessageTone =
+      row.tone === "warn" || row.tone === "stop" ? row.tone : "info";
+    out.push({ text: row.text, tone });
+  }
+  return out;
+}
+
 export function useQuickMessages() {
-  const [quickMessages, setQuickMessagesState] = useState<string[]>(() => {
+  const [quickMessages, setQuickMessagesState] = useState<QuickMessage[]>(() => {
     try {
-      const stored = JSON.parse(window.localStorage.getItem(QUICK_MESSAGES_STORAGE) ?? "null");
-      if (Array.isArray(stored) && stored.every((m) => typeof m === "string"))
-        return stored as string[];
+      const stored = sanitizeQuickMessages(
+        JSON.parse(window.localStorage.getItem(QUICK_MESSAGES_STORAGE) ?? "null"),
+      );
+      if (stored) return stored;
     } catch {
       // ignore unreadable storage
     }
     return DEFAULT_QUICK_MESSAGES;
   });
 
-  const setQuickMessages = useCallback((next: string[]) => {
+  const setQuickMessages = useCallback((next: QuickMessage[]) => {
     setQuickMessagesState(next);
     try {
       window.localStorage.setItem(QUICK_MESSAGES_STORAGE, JSON.stringify(next));
@@ -401,4 +451,232 @@ export function useQuickMessages() {
   }, []);
 
   return { quickMessages, setQuickMessages };
+}
+
+/* ------------------------------------------------------------------ */
+/* Cue flash                                                           */
+/* ------------------------------------------------------------------ */
+
+export type CueIntensity = "subtle" | "normal" | "strong";
+
+export type CueSettings = {
+  enabled: boolean;
+  atWarn: boolean;
+  atDanger: boolean;
+  atZero: boolean;
+  intensity: CueIntensity;
+};
+
+export const DEFAULT_CUE_SETTINGS: CueSettings = {
+  enabled: true,
+  atWarn: true,
+  atDanger: true,
+  atZero: true,
+  intensity: "normal",
+};
+
+export const CUE_INTENSITY_OPACITY: Record<CueIntensity, number> = {
+  subtle: 0.25,
+  normal: 0.5,
+  strong: 0.8,
+};
+
+export type CueMark = "warn" | "danger" | "over";
+
+function sanitizeCueSettings(value: unknown): CueSettings | null {
+  const raw = value as Partial<CueSettings> | undefined;
+  if (!raw || typeof raw !== "object") return null;
+  const intensity: CueIntensity =
+    raw.intensity === "subtle" || raw.intensity === "strong" ? raw.intensity : "normal";
+  return {
+    enabled: raw.enabled !== false,
+    atWarn: raw.atWarn !== false,
+    atDanger: raw.atDanger !== false,
+    atZero: raw.atZero !== false,
+    intensity,
+  };
+}
+
+const CUE_CHANNEL = "stage-cue-flash";
+const CUE_STORAGE = "stage-cue-flash";
+const CUE_TEST_EVENT = "test";
+
+/** Stage side: listens for the cue flash settings chosen in the control room. */
+export function useStageCueSettings() {
+  const [cue, setCue] = useState<CueSettings>(DEFAULT_CUE_SETTINGS);
+  const [testMark, setTestMark] = useState<{ mark: CueMark; at: number } | null>(null);
+
+  useEffect(() => {
+    const channel = supabase.channel(CUE_CHANNEL);
+    channel
+      .on("broadcast", { event: "set" }, ({ payload }) => {
+        const next = sanitizeCueSettings((payload as { cue?: unknown })?.cue);
+        if (next) setCue(next);
+      })
+      .on("broadcast", { event: CUE_TEST_EVENT }, ({ payload }) => {
+        const mark = (payload as { mark?: CueMark })?.mark ?? "over";
+        setTestMark({ mark, at: Date.now() });
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.send({ type: "broadcast", event: "request", payload: {} });
+        }
+      });
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  return { cue, testMark };
+}
+
+/**
+ * Control room side: owns the cue flash settings, remembers them locally and
+ * pushes them to every stage screen.
+ */
+export function useCueControl() {
+  const [cue, setCue] = useState<CueSettings>(DEFAULT_CUE_SETTINGS);
+  const cueRef = useRef<CueSettings>(DEFAULT_CUE_SETTINGS);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const [testMark, setTestMark] = useState<{ mark: CueMark; at: number } | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = sanitizeCueSettings(
+        JSON.parse(window.localStorage.getItem(CUE_STORAGE) ?? "null"),
+      );
+      if (stored) {
+        cueRef.current = stored;
+        setCue(stored);
+      }
+    } catch {
+      // ignore unreadable storage
+    }
+
+    const channel = supabase.channel(CUE_CHANNEL);
+    channelRef.current = channel;
+    channel
+      .on("broadcast", { event: "set" }, ({ payload }) => {
+        const next = sanitizeCueSettings((payload as { cue?: unknown })?.cue);
+        if (next) {
+          cueRef.current = next;
+          setCue(next);
+        }
+      })
+      .on("broadcast", { event: CUE_TEST_EVENT }, ({ payload }) => {
+        const mark = (payload as { mark?: CueMark })?.mark ?? "over";
+        setTestMark({ mark, at: Date.now() });
+      })
+      .on("broadcast", { event: "request" }, () => {
+        void channel.send({ type: "broadcast", event: "set", payload: { cue: cueRef.current } });
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          void channel.send({ type: "broadcast", event: "set", payload: { cue: cueRef.current } });
+        }
+      });
+    return () => {
+      channelRef.current = null;
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const updateCue = useCallback((next: CueSettings) => {
+    const safe = sanitizeCueSettings(next) ?? DEFAULT_CUE_SETTINGS;
+    cueRef.current = safe;
+    setCue(safe);
+    try {
+      window.localStorage.setItem(CUE_STORAGE, JSON.stringify(safe));
+    } catch {
+      // ignore unwritable storage
+    }
+    void channelRef.current?.send({ type: "broadcast", event: "set", payload: { cue: safe } });
+  }, []);
+
+  const testCue = useCallback((mark: CueMark = "over") => {
+    setTestMark({ mark, at: Date.now() });
+    void channelRef.current?.send({
+      type: "broadcast",
+      event: CUE_TEST_EVENT,
+      payload: { mark },
+    });
+  }, []);
+
+  return { cue, setCue: updateCue, testCue, testMark };
+}
+
+/**
+ * Fires a short pulse the moment the countdown crosses a cue mark. Each mark
+ * fires once per talk and resets when the speaker or the timer is reset.
+ */
+export function useCueFlash({
+  remaining,
+  running,
+  speakerId,
+  cue,
+  thresholds,
+  testMark,
+}: {
+  remaining: number;
+  running: boolean;
+  speakerId: string | null;
+  cue: CueSettings;
+  thresholds: Thresholds;
+  testMark?: { mark: CueMark; at: number } | null;
+}) {
+  const [flash, setFlash] = useState<CueMark | null>(null);
+  const firedRef = useRef<Set<CueMark>>(new Set());
+  const lastRemainingRef = useRef<number>(remaining);
+  const talkKey = `${speakerId ?? "none"}`;
+  const talkKeyRef = useRef(talkKey);
+  const timeoutRef = useRef<number | null>(null);
+
+  const trigger = useCallback((mark: CueMark) => {
+    setFlash(mark);
+    if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    timeoutRef.current = window.setTimeout(() => setFlash(null), 1400);
+  }, []);
+
+  // A manual test from settings always shows, whatever the timer is doing.
+  useEffect(() => {
+    if (!testMark) return;
+    trigger(testMark.mark);
+  }, [testMark?.at, testMark?.mark, trigger, testMark]);
+
+  useEffect(() => {
+    if (talkKeyRef.current !== talkKey) {
+      talkKeyRef.current = talkKey;
+      firedRef.current.clear();
+    }
+
+    const previous = lastRemainingRef.current;
+    lastRemainingRef.current = remaining;
+
+    // The clock went backwards (reset or time added) — let the marks fire again.
+    if (remaining > previous + 1) firedRef.current.clear();
+    if (!cue.enabled || !running) return;
+
+    const marks: { mark: CueMark; at: number; on: boolean }[] = [
+      { mark: "warn", at: thresholds.warnMinutes * 60, on: cue.atWarn },
+      { mark: "danger", at: thresholds.dangerMinutes * 60, on: cue.atDanger },
+      { mark: "over", at: 0, on: cue.atZero },
+    ];
+
+    for (const { mark, at, on } of marks) {
+      if (!on || firedRef.current.has(mark)) continue;
+      if (previous > at && remaining <= at) {
+        firedRef.current.add(mark);
+        trigger(mark);
+      }
+    }
+  }, [remaining, running, talkKey, cue, thresholds, trigger]);
+
+  useEffect(
+    () => () => {
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    },
+    [],
+  );
+
+  return flash;
 }

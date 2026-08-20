@@ -593,7 +593,10 @@ function AdminPage() {
       toast.error(parsed.error.issues[0]?.message ?? "Check the message");
       return;
     }
-    await patchState({ message: parsed.data, message_sent_at: new Date().toISOString() });
+    await patchState({
+      message: encodeStageMessage(parsed.data, messageTone),
+      message_sent_at: new Date().toISOString(),
+    });
     setMessage("");
     toast.success("Message sent to stage");
   }
@@ -904,6 +907,8 @@ function AdminPage() {
                   now={now}
                   showElapsed={displayMode === "elapsed"}
                   thresholds={thresholds}
+                  cue={cue}
+                  cueTest={testMark}
                 />
               </div>
               <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2">

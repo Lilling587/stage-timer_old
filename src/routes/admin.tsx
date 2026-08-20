@@ -299,6 +299,7 @@ function AdminPage() {
   const [duration, setDuration] = useState("20");
   const [message, setMessage] = useState("");
   const [messageTone, setMessageTone] = useState<MessageTone>("info");
+  const liveMessage = decodeStageMessage(state?.message);
     const [notes, setNotes] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);

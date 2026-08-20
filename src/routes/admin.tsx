@@ -28,10 +28,12 @@ import type { AdminActionInput } from "@/lib/admin-actions";
 import { adminAction } from "@/lib/admin.functions";
 import {
   MESSAGE_TONES,
+  SPEED_OPTIONS,
   decodeStageMessage,
   elapsedFor,
   encodeStageMessage,
   formatClock,
+  speedCaption,
   toneFor,
   useAdjustmentSettings,
   useAdminPresence,
@@ -40,9 +42,11 @@ import {
   useNow,
   useQuickMessages,
   useShow,
+  useSpeedControl,
   useThresholdControl,
   type MessageTone,
   type Speaker,
+  type SpeedRate,
 } from "@/lib/show";
 
 const toneDot: Record<MessageTone, string> = {

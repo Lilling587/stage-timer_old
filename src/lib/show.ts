@@ -428,17 +428,18 @@ function sanitizeQuickMessages(value: unknown): QuickMessage[] | null {
 }
 
 export function useQuickMessages() {
-  const [quickMessages, setQuickMessagesState] = useState<QuickMessage[]>(() => {
+  const [quickMessages, setQuickMessagesState] = useState<QuickMessage[]>(DEFAULT_QUICK_MESSAGES);
+
+  useEffect(() => {
     try {
       const stored = sanitizeQuickMessages(
         JSON.parse(window.localStorage.getItem(QUICK_MESSAGES_STORAGE) ?? "null"),
       );
-      if (stored) return stored;
+      if (stored) setQuickMessagesState(stored);
     } catch {
       // ignore unreadable storage
     }
-    return DEFAULT_QUICK_MESSAGES;
-  });
+  }, []);
 
   const setQuickMessages = useCallback((next: QuickMessage[]) => {
     setQuickMessagesState(next);

@@ -63,6 +63,7 @@ function SettingsPage() {
   const { cue, setCue, testCue } = useCueControl();
   const [draft, setDraft] = useState("");
   const [draftTone, setDraftTone] = useState<MessageTone>("info");
+  const [confirmReset, setConfirmReset] = useState(false);
 
   function addQuickMessage() {
     const value = draft.trim().slice(0, 200);
@@ -221,13 +222,30 @@ function SettingsPage() {
             <h2 className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-console-muted">
               Quick messages
             </h2>
-            <button
-              type="button"
-              onClick={() => setQuickMessages(DEFAULT_QUICK_MESSAGES)}
-              className={ghostButton}
-            >
-              Reset
-            </button>
+            {confirmReset ? (
+              <span className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-console-muted">
+                  Reset to defaults?
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuickMessages(DEFAULT_QUICK_MESSAGES);
+                    setConfirmReset(false);
+                  }}
+                  className={accentButton}
+                >
+                  Confirm
+                </button>
+                <button type="button" onClick={() => setConfirmReset(false)} className={ghostButton}>
+                  Cancel
+                </button>
+              </span>
+            ) : (
+              <button type="button" onClick={() => setConfirmReset(true)} className={ghostButton}>
+                Reset
+              </button>
+            )}
           </div>
           <p className="mb-3 text-[11px] text-console-dim">
             One-tap messages shown above the message box in the command page.

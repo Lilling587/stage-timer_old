@@ -47,6 +47,7 @@ export function StageScreen({
   thresholds = DEFAULT_THRESHOLDS,
   cue = DEFAULT_CUE_SETTINGS,
   cueTest = null,
+  rate = 1,
 }: {
   speaker: Speaker | null;
   state: TimerState | null;
@@ -56,6 +57,7 @@ export function StageScreen({
   thresholds?: Thresholds;
   cue?: CueSettings;
   cueTest?: { mark: CueMark; at: number } | null;
+  rate?: number;
 }) {
   const { text: messageText, tone: messageTone } = decodeStageMessage(state?.message);
   // Keep the last message mounted briefly so clearing it fades out instead of popping.
@@ -85,7 +87,7 @@ export function StageScreen({
   const wallClock = new Date(now).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
 
   const total = (speaker?.duration_minutes ?? 0) * 60;
-  const elapsed = elapsedFor(state, now);
+  const elapsed = elapsedFor(state, now, rate);
   const remaining = speaker ? total - elapsed : 0;
   const tone = toneFor(remaining, thresholds);
   const isRunning = state?.status === "running";

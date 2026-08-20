@@ -226,3 +226,23 @@
 .blackout-blink {
   animation: blackout-blink 3s ease-in-out infinite;
 }
+
+/* Cue flash: two short pulses at a cue mark, then straight back to normal. */
+@keyframes stage-cue-pulse {
+  0% { opacity: 0; }
+  12% { opacity: var(--cue-opacity, 0.5); }
+  30% { opacity: 0; }
+  48% { opacity: var(--cue-opacity, 0.5); }
+  70%, 100% { opacity: 0; }
+}
+
+.stage-cue-flash {
+  opacity: 0;
+  animation: stage-cue-pulse 1.4s ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-cue-flash {
+    animation-duration: 1.4s;
+  }
+}

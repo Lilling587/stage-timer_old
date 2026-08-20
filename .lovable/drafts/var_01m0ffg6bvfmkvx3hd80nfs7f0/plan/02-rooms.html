@@ -1,0 +1,59 @@
+<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" style="font-family: var(--font-sans); width:100%; height:auto">
+  <style>
+    .lbl { font-size: 14px; font-weight: 480; fill: hsl(var(--foreground)); }
+    .sm  { font-size: 12px; fill: hsl(var(--muted-foreground)); }
+    .mono{ font-size: 12px; font-family: var(--font-mono); fill: hsl(var(--foreground)); }
+    .bx  { fill: none; stroke: hsl(var(--muted-foreground)); stroke-width: 1; }
+    .zn  { fill: none; stroke: hsl(var(--border)); stroke-width: 1; stroke-dasharray: 4 3; }
+    .wr  { stroke: hsl(var(--muted-foreground)); stroke-width: 1; fill: none; }
+  </style>
+  <defs>
+    <marker id="ch" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M1 1 L7 4 L1 7" fill="none" stroke="hsl(var(--muted-foreground))" stroke-width="1"/>
+    </marker>
+  </defs>
+
+  <rect class="zn" x="8" y="18" width="300" height="122" rx="8"/>
+  <text class="sm" x="20" y="36">room: main-hall</text>
+  <rect class="bx" x="24" y="48" width="120" height="36" rx="8"/>
+  <text class="mono" x="34" y="70">/admin/main-hall</text>
+  <rect class="bx" x="24" y="94" width="120" height="34" rx="8"/>
+  <text class="mono" x="34" y="115">/stage/main-hall</text>
+  <rect class="bx" x="188" y="66" width="104" height="48" rx="8"/>
+  <text class="lbl" x="204" y="86">own list</text>
+  <text class="sm" x="204" y="103">timer · message</text>
+  <line class="wr" x1="146" y1="66" x2="186" y2="86" marker-end="url(#ch)"/>
+  <line class="wr" x1="146" y1="111" x2="186" y2="95" marker-end="url(#ch)"/>
+
+  <rect class="zn" x="8" y="156" width="300" height="122" rx="8"/>
+  <text class="sm" x="20" y="174">room: studio-b</text>
+  <rect class="bx" x="24" y="186" width="120" height="36" rx="8"/>
+  <text class="mono" x="34" y="208">/admin/studio-b</text>
+  <rect class="bx" x="24" y="232" width="120" height="34" rx="8"/>
+  <text class="mono" x="34" y="253">/stage/studio-b</text>
+  <rect class="bx" x="188" y="204" width="104" height="48" rx="8"/>
+  <text class="lbl" x="204" y="224">own list</text>
+  <text class="sm" x="204" y="241">timer · message</text>
+  <line class="wr" x1="146" y1="204" x2="186" y2="224" marker-end="url(#ch)"/>
+  <line class="wr" x1="146" y1="249" x2="186" y2="233" marker-end="url(#ch)"/>
+
+  <rect class="bx" x="352" y="18" width="272" height="118" rx="8"/>
+  <text class="lbl" x="368" y="42">Stage message, by tone</text>
+  <rect x="368" y="56" width="240" height="20" rx="10" fill="hsl(var(--muted))"/>
+  <text class="sm" x="378" y="70">info — please wrap up</text>
+  <rect x="368" y="82" width="240" height="20" rx="10" fill="hsl(var(--secondary))"/>
+  <text class="sm" x="378" y="96">warning — 2 minutes left</text>
+  <rect x="368" y="108" width="240" height="20" rx="10" fill="hsl(var(--accent))"/>
+  <text x="378" y="122" style="font-size:12px; fill: hsl(var(--accent-foreground))">stop — time is up</text>
+
+  <rect class="bx" x="352" y="156" width="272" height="122" rx="8"/>
+  <text class="lbl" x="368" y="180">Cue flash on the stage screen</text>
+  <line x1="368" y1="228" x2="608" y2="228" stroke="hsl(var(--border))" stroke-width="1"/>
+  <circle cx="424" cy="228" r="5" fill="hsl(var(--muted-foreground))"/>
+  <circle cx="512" cy="228" r="5" fill="hsl(var(--muted-foreground))"/>
+  <circle cx="600" cy="228" r="7" fill="hsl(var(--accent))"/>
+  <text class="sm" x="404" y="250">5 min</text>
+  <text class="sm" x="494" y="250">2 min</text>
+  <text class="sm" x="576" y="250">00:00</text>
+  <text class="sm" x="368" y="270">two short pulses at each mark · configurable</text>
+</svg>

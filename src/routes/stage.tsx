@@ -28,7 +28,7 @@ function StagePage() {
   const displayMode = (state?.display_mode as "remaining" | "elapsed") ?? "remaining";
   const thresholds = useStageThresholds();
   const { cue, testMark } = useStageCueSettings();
-  const rate = useStageSpeed();
+  const { segments: speedSegments } = useStageSpeed();
   const now = useNow(true);
   const speaker = speakers.find((s) => s.id === state?.current_speaker_id) ?? null;
 
@@ -140,7 +140,7 @@ function StagePage() {
         thresholds={thresholds}
         cue={cue}
         cueTest={testMark}
-        rate={rate}
+        rate={speedSegments}
       />
       <div
         role="status"

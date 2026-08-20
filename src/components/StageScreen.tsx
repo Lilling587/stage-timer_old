@@ -9,6 +9,7 @@ import {
   DEFAULT_CUE_SETTINGS,
   decodeStageMessage,
   elapsedFor,
+  type SpeedSegment,
   formatClock,
   toneFor,
   useCueFlash,
@@ -57,7 +58,7 @@ export function StageScreen({
   thresholds?: Thresholds;
   cue?: CueSettings;
   cueTest?: { mark: CueMark; at: number } | null;
-  rate?: number;
+  rate?: number | SpeedSegment[];
 }) {
   const { text: messageText, tone: messageTone } = decodeStageMessage(state?.message);
   // Keep the last message mounted briefly so clearing it fades out instead of popping.

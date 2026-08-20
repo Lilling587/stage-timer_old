@@ -42,9 +42,8 @@ export type Database = {
         Relationships: []
       }
       timer_state: {
-                Row: {
+        Row: {
           blackout: boolean
-          speed_segments: Json
           current_speaker_id: string | null
           display_mode: string
           elapsed_seconds: number
@@ -53,13 +52,13 @@ export type Database = {
           message_sent_at: string | null
           revision: number
           show_clock: boolean
+          speed_segments: Json
           started_at: string | null
           status: string
           updated_at: string
         }
-                Insert: {
+        Insert: {
           blackout?: boolean
-          speed_segments?: Json
           current_speaker_id?: string | null
           display_mode?: string
           elapsed_seconds?: number
@@ -68,13 +67,13 @@ export type Database = {
           message_sent_at?: string | null
           revision?: number
           show_clock?: boolean
+          speed_segments?: Json
           started_at?: string | null
           status?: string
           updated_at?: string
         }
-                Update: {
+        Update: {
           blackout?: boolean
-          speed_segments?: Json
           current_speaker_id?: string | null
           display_mode?: string
           elapsed_seconds?: number
@@ -83,6 +82,7 @@ export type Database = {
           message_sent_at?: string | null
           revision?: number
           show_clock?: boolean
+          speed_segments?: Json
           started_at?: string | null
           status?: string
           updated_at?: string

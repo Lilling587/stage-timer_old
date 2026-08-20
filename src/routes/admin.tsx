@@ -1028,9 +1028,27 @@ function AdminPage() {
                   </button>
                 </div>
                 <div className="mt-4 border-t border-console-line pt-3">
-                  <p className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-dim">
-                    Timer speed
-                  </p>
+                  <div className="mb-2 flex items-baseline justify-between gap-2">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-console-dim">
+                      Timer speed
+                    </p>
+                    <p className="font-console-mono text-xs text-console-accent">
+                      {formatRate(rate)}x
+                      <span className="ml-1.5 text-[9px] text-console-dim">
+                        {speedCaption(rate)}
+                      </span>
+                    </p>
+                  </div>
+                  <input
+                    type="range"
+                    min={MIN_SPEED}
+                    max={MAX_SPEED}
+                    step={SPEED_STEP}
+                    value={rate}
+                    onChange={(event) => changeSpeed(Number(event.target.value))}
+                    aria-label="Timer speed"
+                    className="mb-3 w-full accent-[var(--console-accent)]"
+                  />
                   <div className="grid grid-cols-5 gap-1.5">
                     {SPEED_OPTIONS.map((option) => (
                       <button

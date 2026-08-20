@@ -46,7 +46,6 @@ import {
 } from "@/lib/show";
 
 export const Route = createFileRoute("/admin")({
-  // route options below
   head: () => ({
     meta: [
       { title: "Run of show — Stage Timer" },

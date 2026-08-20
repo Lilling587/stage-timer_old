@@ -2,11 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   DEFAULT_ADJUSTMENTS,
+  DEFAULT_CUE_SETTINGS,
   DEFAULT_QUICK_MESSAGES,
   DEFAULT_THRESHOLDS,
+  MESSAGE_TONES,
   useAdjustmentSettings,
+  useCueControl,
   useQuickMessages,
   useThresholdControl,
+  type CueIntensity,
+  type MessageTone,
 } from "@/lib/show";
 
 export const Route = createFileRoute("/settings")({
@@ -39,17 +44,32 @@ const ghostButton =
 const accentButton =
   "rounded-lg bg-console-accent px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-console-accent-fg transition-all hover:bg-console-accent-hover active:scale-95 disabled:pointer-events-none disabled:opacity-40";
 
+const toneDot: Record<MessageTone, string> = {
+  info: "bg-console-muted",
+  warn: "bg-console-warn",
+  stop: "bg-console-danger",
+};
+
+const CUE_INTENSITIES: { value: CueIntensity; label: string }[] = [
+  { value: "subtle", label: "Subtle" },
+  { value: "normal", label: "Normal" },
+  { value: "strong", label: "Strong" },
+];
+
 function SettingsPage() {
   const { thresholds, setThresholds } = useThresholdControl();
   const { adjustments, setAdjustments } = useAdjustmentSettings();
   const { quickMessages, setQuickMessages } = useQuickMessages();
+  const { cue, setCue, testCue } = useCueControl();
   const [draft, setDraft] = useState("");
+  const [draftTone, setDraftTone] = useState<MessageTone>("info");
 
   function addQuickMessage() {
     const value = draft.trim().slice(0, 200);
     if (!value) return;
-    setQuickMessages([...quickMessages, value]);
+    setQuickMessages([...quickMessages, { text: value, tone: draftTone }]);
     setDraft("");
+    setDraftTone("info");
   }
 
   return (

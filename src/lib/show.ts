@@ -27,11 +27,44 @@ export type SyncStatus = "connected" | "syncing" | "disconnected";
 
 export const STATE_ID = "main";
 
-export function elapsedFor(state: TimerState | null, now: number, rate = 1) {
+/**
+ * A speed change point: from this wall-clock moment onwards the timer runs at `rate`.
+ * Integrating over segments keeps speed changes seamless — seconds already counted
+ * always stay counted at the speed they were counted with.
+ */
+export type SpeedSegment = { from: number; rate: number };
+
+function integrateSpeed(startMs: number, endMs: number, speed: number | SpeedSegment[]) {
+  if (endMs <= startMs) return 0;
+  if (typeof speed === "number") return ((endMs - startMs) / 1000) * speed;
+  const segments = [...speed].sort((a, b) => a.from - b.from);
+  let total = 0;
+  let cursor = startMs;
+  let rate = 1;
+  for (const segment of segments) {
+    if (segment.from <= cursor) {
+      rate = segment.rate;
+      continue;
+    }
+    if (segment.from >= endMs) break;
+    total += ((segment.from - cursor) / 1000) * rate;
+    cursor = segment.from;
+    rate = segment.rate;
+  }
+  total += ((endMs - cursor) / 1000) * rate;
+  return total;
+}
+
+export function elapsedFor(
+  state: TimerState | null,
+  now: number,
+  speed: number | SpeedSegment[] = 1,
+) {
   if (!state) return 0;
   const base = state.elapsed_seconds ?? 0;
   if (state.status === "running" && state.started_at) {
-    return base + Math.max(0, (now - new Date(state.started_at).getTime()) / 1000) * rate;
+    const startedAt = new Date(state.started_at).getTime();
+    return base + Math.max(0, integrateSpeed(startedAt, now, speed));
   }
   return base;
 }

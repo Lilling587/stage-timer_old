@@ -12,7 +12,16 @@ const statePatchSchema = z
     message_sent_at: z.string().datetime().nullable().optional(),
     display_mode: z.enum(["remaining", "elapsed"]).optional(),
     show_clock: z.boolean().optional(),
-    blackout: z.boolean().optional(),
+        blackout: z.boolean().optional(),
+    speed_segments: z
+      .array(
+        z.object({
+          from: z.number().int().min(0),
+          rate: z.number().min(0.25).max(4),
+        }),
+      )
+      .max(200)
+      .optional(),
   })
   .strict();
 

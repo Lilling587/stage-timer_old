@@ -27,11 +27,11 @@ export type SyncStatus = "connected" | "syncing" | "disconnected";
 
 export const STATE_ID = "main";
 
-export function elapsedFor(state: TimerState | null, now: number) {
+export function elapsedFor(state: TimerState | null, now: number, rate = 1) {
   if (!state) return 0;
   const base = state.elapsed_seconds ?? 0;
   if (state.status === "running" && state.started_at) {
-    return base + Math.max(0, (now - new Date(state.started_at).getTime()) / 1000);
+    return base + Math.max(0, (now - new Date(state.started_at).getTime()) / 1000) * rate;
   }
   return base;
 }

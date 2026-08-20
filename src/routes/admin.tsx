@@ -45,6 +45,12 @@ import {
   type Speaker,
 } from "@/lib/show";
 
+const toneDot: Record<MessageTone, string> = {
+  info: "bg-console-muted",
+  warn: "bg-console-warn",
+  stop: "bg-console-danger",
+};
+
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [

@@ -1,4 +1,9 @@
 import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
   DEFAULT_THRESHOLDS,
   CUE_INTENSITY_OPACITY,
   DEFAULT_CUE_SETTINGS,
@@ -53,7 +58,29 @@ export function StageScreen({
   cueTest?: { mark: CueMark; at: number } | null;
 }) {
   const { text: messageText, tone: messageTone } = decodeStageMessage(state?.message);
-  const messageVisible = messageText.length > 0;
+  // Keep the last message mounted briefly so clearing it fades out instead of popping.
+  const [shownMessage, setShownMessage] = useState({ text: messageText, tone: messageTone });
+  const [leaving, setLeaving] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (messageText.length > 0) {
+      setLeaving(false);
+      setShownMessage({ text: messageText, tone: messageTone });
+      return;
+    }
+    setLeaving(true);
+    timeoutRef.current = setTimeout(() => {
+      setLeaving(false);
+      setShownMessage({ text: "", tone: "info" });
+    }, 600);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [messageText, messageTone]);
+
+  const messageVisible = shownMessage.text.length > 0;
   const showClock = state?.show_clock ?? false;
   const wallClock = new Date(now).toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
 
@@ -120,14 +147,14 @@ export function StageScreen({
 
       {messageVisible ? (
         <div
-          className={`stage-message absolute inset-x-0 bottom-6 z-20 text-center backdrop-blur ${
-            messageToneClass[messageTone]
+          className={`${leaving ? "stage-message-leaving" : "stage-message"} absolute inset-x-0 bottom-6 z-20 text-center backdrop-blur ${
+            messageToneClass[shownMessage.tone]
           } ${
             compact ? "px-3 py-2" : "px-10 py-8"
           }`}
         >
           <p className={`font-medium ${compact ? "text-xs" : "text-[3vw]"}`}>
-            {messageText}
+            {shownMessage.text}
           </p>
         </div>
       ) : null}

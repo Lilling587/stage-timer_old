@@ -77,6 +77,7 @@
   --color-console-accent-hover: var(--console-accent-hover);
   --color-console-accent-fg: var(--console-accent-fg);
   --color-console-danger: var(--console-danger);
+  --color-console-warn: var(--console-warn);
   --color-console-ok: var(--console-ok);
   --font-sora: 'Sora', sans-serif;
   --font-manrope: 'Manrope', sans-serif;
@@ -140,6 +141,7 @@
   --console-accent-hover: oklch(0.71 0.17 39.5);
   --console-accent-fg: oklch(0.99 0 0);
   --console-danger: oklch(0.62 0.21 27);
+  --console-warn: oklch(0.78 0.16 78);
   --console-ok: oklch(0.72 0.18 148);
 }
 

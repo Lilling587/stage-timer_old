@@ -68,18 +68,13 @@ export function StageScreen({
     if (messageText.length > 0) {
       setLeaving(false);
       setShownMessage({ text: messageText, tone: messageTone });
-    } else {
-      setLeaving((wasLeaving) => wasLeaving);
-      setShownMessage((prev) => {
-        if (prev.text.length === 0) return prev;
-        setLeaving(true);
-        timeoutRef.current = setTimeout(() => {
-          setLeaving(false);
-          setShownMessage({ text: "", tone: "info" });
-        }, 600);
-        return prev;
-      });
+      return;
     }
+    setLeaving(true);
+    timeoutRef.current = setTimeout(() => {
+      setLeaving(false);
+      setShownMessage({ text: "", tone: "info" });
+    }, 600);
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };

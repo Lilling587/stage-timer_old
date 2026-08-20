@@ -28,7 +28,6 @@ import type { AdminActionInput } from "@/lib/admin-actions";
 import { adminAction } from "@/lib/admin.functions";
 import {
   MESSAGE_TONES,
-  SPEED_OPTIONS,
   MIN_SPEED,
   MAX_SPEED,
   SPEED_STEP,

@@ -127,7 +127,16 @@ export function useShow() {
           wasConnected = false;
         }
       });
+        // Fallback for networks that block WebSockets (guest wifi, filtering
+    // proxies). Realtime still gives instant updates when it works; this
+    // guarantees updates when it doesn't. Skipped while the tab is hidden.
+    const poll = window.setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      void refresh();
+    }, 1000);
+
     return () => {
+      window.clearInterval(poll);
       setSyncStatus("disconnected");
       void supabase.removeChannel(channel);
     };

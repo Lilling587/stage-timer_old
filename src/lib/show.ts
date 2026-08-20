@@ -402,16 +402,31 @@ export function speedCaption(rate: SpeedRate) {
     : `1 min = ${seconds} s real`;
 }
 
+const INITIAL_SEGMENTS: SpeedSegment[] = [{ from: 0, rate: 1 }];
+
+function sanitizeSegments(value: unknown): SpeedSegment[] | null {
+  if (!Array.isArray(value)) return null;
+  const cleaned = value
+    .map((entry) => {
+      const from = Number((entry as { from?: unknown })?.from);
+      const rate = sanitizeRate((entry as { rate?: unknown })?.rate);
+      return Number.isFinite(from) && rate ? { from, rate } : null;
+    })
+    .filter((entry): entry is SpeedSegment => entry !== null)
+    .sort((a, b) => a.from - b.from);
+  return cleaned.length ? cleaned : null;
+}
+
 /** Stage side: follows the speed chosen in the control room. Always starts at 1x. */
 export function useStageSpeed() {
-  const [rate, setRate] = useState<SpeedRate>(1);
+  const [segments, setSegments] = useState<SpeedSegment[]>(INITIAL_SEGMENTS);
 
   useEffect(() => {
     const channel = supabase.channel(SPEED_CHANNEL);
     channel
       .on("broadcast", { event: "set" }, ({ payload }) => {
-        const next = sanitizeRate((payload as { rate?: unknown })?.rate);
-        if (next) setRate(next);
+        const next = sanitizeSegments((payload as { segments?: unknown })?.segments);
+        if (next) setSegments(next);
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -423,7 +438,8 @@ export function useStageSpeed() {
     };
   }, []);
 
-  return rate;
+  const rate = (segments[segments.length - 1]?.rate ?? 1) as SpeedRate;
+  return { rate, segments };
 }
 
 /**
@@ -431,8 +447,8 @@ export function useStageSpeed() {
  * Deliberately not persisted — every fresh load starts at real time.
  */
 export function useSpeedControl() {
-  const [rate, setRate] = useState<SpeedRate>(1);
-  const rateRef = useRef<SpeedRate>(1);
+  const [segments, setSegments] = useState<SpeedSegment[]>(INITIAL_SEGMENTS);
+  const segmentsRef = useRef<SpeedSegment[]>(INITIAL_SEGMENTS);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
@@ -440,14 +456,18 @@ export function useSpeedControl() {
     channelRef.current = channel;
     channel
       .on("broadcast", { event: "set" }, ({ payload }) => {
-        const next = sanitizeRate((payload as { rate?: unknown })?.rate);
+        const next = sanitizeSegments((payload as { segments?: unknown })?.segments);
         if (next) {
-          rateRef.current = next;
-          setRate(next);
+          segmentsRef.current = next;
+          setSegments(next);
         }
       })
       .on("broadcast", { event: "request" }, () => {
-        void channel.send({ type: "broadcast", event: "set", payload: { rate: rateRef.current } });
+        void channel.send({
+          type: "broadcast",
+          event: "set",
+          payload: { segments: segmentsRef.current },
+        });
       })
       .subscribe();
     return () => {
@@ -458,12 +478,20 @@ export function useSpeedControl() {
 
   const setSpeed = useCallback((next: SpeedRate) => {
     const safe = sanitizeRate(next) ?? 1;
-    rateRef.current = safe;
-    setRate(safe);
-    void channelRef.current?.send({ type: "broadcast", event: "set", payload: { rate: safe } });
+    const previous = segmentsRef.current;
+    if ((previous[previous.length - 1]?.rate ?? 1) === safe) return;
+    const updated = [...previous, { from: Date.now(), rate: safe }].slice(-200);
+    segmentsRef.current = updated;
+    setSegments(updated);
+    void channelRef.current?.send({
+      type: "broadcast",
+      event: "set",
+      payload: { segments: updated },
+    });
   }, []);
 
-  return { rate, setSpeed };
+  const rate = (segments[segments.length - 1]?.rate ?? 1) as SpeedRate;
+  return { rate, segments, setSpeed };
 }
 
 export const DEFAULT_ADJUSTMENTS = [-5, -1, 1, 5];

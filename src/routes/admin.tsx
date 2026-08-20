@@ -304,7 +304,7 @@ function AdminPage() {
   const { adjustments } = useAdjustmentSettings();
   const { quickMessages } = useQuickMessages();
   const { cue, testMark } = useCueControl();
-  const { rate, setSpeed } = useSpeedControl();
+  const { rate, segments: speedSegments, setSpeed } = useSpeedControl();
   const now = useNow(true);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("20");
@@ -568,20 +568,14 @@ function AdminPage() {
     if (state?.status !== "running") return;
     await patchState({
       status: "paused",
-      elapsed_seconds: Math.round(elapsedFor(state, Date.now(), rate)),
+      elapsed_seconds: Math.round(elapsedFor(state, Date.now(), speedSegments)),
       started_at: null,
     });
   }
 
   // Bank the seconds already counted at the old speed so the clock never jumps.
-  async function changeSpeed(next: SpeedRate) {
+  function changeSpeed(next: SpeedRate) {
     if (next === rate) return;
-    if (state?.status === "running") {
-      await patchState({
-        elapsed_seconds: Math.round(elapsedFor(state, Date.now(), rate)),
-        started_at: new Date().toISOString(),
-      });
-    }
     setSpeed(next);
   }
 
@@ -926,7 +920,7 @@ function AdminPage() {
                   thresholds={thresholds}
                   cue={cue}
                   cueTest={testMark}
-                  rate={rate}
+                  rate={speedSegments}
                 />
               </div>
               <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2">
@@ -969,7 +963,7 @@ function AdminPage() {
                           safe: "text-console-ok",
                         }[
                           toneFor(
-                            current.duration_minutes * 60 - elapsedFor(state, now, rate),
+                            current.duration_minutes * 60 - elapsedFor(state, now, speedSegments),
                             thresholds,
                           )
                         ]
@@ -977,8 +971,8 @@ function AdminPage() {
                     >
                       {formatClock(
                         displayMode === "elapsed"
-                          ? elapsedFor(state, now, rate)
-                          : current.duration_minutes * 60 - elapsedFor(state, now, rate),
+                          ? elapsedFor(state, now, speedSegments)
+                          : current.duration_minutes * 60 - elapsedFor(state, now, speedSegments),
                       )}
                     </span>
                   ) : null}
@@ -1019,7 +1013,7 @@ function AdminPage() {
                       <button
                         key={option}
                         type="button"
-                        onClick={() => void changeSpeed(option)}
+                        onClick={() => changeSpeed(option)}
                         aria-pressed={rate === option}
                         className={`flex flex-col items-center gap-0.5 rounded-xl border px-1 py-2 transition-all active:scale-95 ${
                           rate === option

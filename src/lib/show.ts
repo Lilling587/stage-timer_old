@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { adminAction } from "@/lib/admin.functions";
 
 export type Speaker = {
   id: string;
@@ -19,13 +20,38 @@ export type TimerState = {
   display_mode: string;
   show_clock: boolean;
   message: string | null;
-  message_sent_at: string | null;
+    message_sent_at: string | null;
   revision: number;
+  /** Mirrored here so screens on WebSocket-blocking networks still get it. */
+  speed_segments: SpeedSegment[] | null;
 };
 
 export type SyncStatus = "connected" | "syncing" | "disconnected";
 
 export const STATE_ID = "main";
+
+/**
+ * Mirrors a stage setting into the timer_state row. useShow() polls that row,
+ * so every screen picks the change up even when Realtime is blocked. The table
+ * is read-only for anonymous clients, so this goes through the server function.
+ */
+export async function patchStageSettings(patch: Record<string, unknown>) {
+  try {
+    await adminAction({ data: { action: { type: "patchState", patch: patch as never } } });
+  } catch {
+    /* the local value still applies; the next change tries again */
+  }
+}
+
+/** One-off read of the mirrored speed, used when a console first opens. */
+export async function readSpeedSegments() {
+  const { data } = await supabase
+    .from("timer_state")
+    .select("speed_segments")
+    .eq("id", STATE_ID)
+    .maybeSingle();
+  return (data as { speed_segments?: unknown } | null)?.speed_segments ?? null;
+}
 
 /**
  * A speed change point: from this wall-clock moment onwards the timer runs at `rate`.
@@ -432,20 +458,34 @@ function sanitizeSegments(value: unknown): SpeedSegment[] | null {
     const rate = sanitizeRate((entry as { rate?: unknown })?.rate);
     if (Number.isFinite(from) && rate) cleaned.push({ from, rate });
   }
-  cleaned.sort((a, b) => a.from - b.from);
+    cleaned.sort((a, b) => a.from - b.from);
   return cleaned.length ? cleaned : null;
 }
 
-/** Stage side: follows the speed chosen in the control room. Always starts at 1x. */
-export function useStageSpeed() {
-  const [segments, setSegments] = useState<SpeedSegment[]>(INITIAL_SEGMENTS);
+/** Wall-clock stamp of the newest speed change — used to pick the fresher copy. */
+function lastFrom(segments: SpeedSegment[]) {
+  return segments[segments.length - 1]?.from ?? 0;
+}
+
+/**
+ * Stage side: follows the speed chosen in the control room. Two sources feed it —
+ * the Realtime broadcast (instant, needs WebSockets) and the speed_segments
+ * column on the polled timer_state row (works on any network, including guest
+ * wifi). Whichever copy carries the newer change wins.
+ */
+export function useStageSpeed(state?: TimerState | null) {
+  const [broadcastSegments, setBroadcastSegments] =
+    useState<SpeedSegment[]>(INITIAL_SEGMENTS);
 
   useEffect(() => {
     const channel = supabase.channel(SPEED_CHANNEL);
     channel
       .on("broadcast", { event: "set" }, ({ payload }) => {
         const next = sanitizeSegments((payload as { segments?: unknown })?.segments);
-        if (next) setSegments(next);
+        if (next)
+          setBroadcastSegments((current) =>
+            lastFrom(next) >= lastFrom(current) ? next : current,
+          );
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -457,13 +497,20 @@ export function useStageSpeed() {
     };
   }, []);
 
+  const dbSegments = sanitizeSegments(state?.speed_segments);
+  const segments =
+    dbSegments && lastFrom(dbSegments) > lastFrom(broadcastSegments)
+      ? dbSegments
+      : broadcastSegments;
+
   const rate = (segments[segments.length - 1]?.rate ?? 1) as SpeedRate;
   return { rate, segments };
 }
 
 /**
- * Control room side: owns the timer speed and pushes it to every stage screen.
- * Deliberately not persisted — every fresh load starts at real time.
+ * Control room side: owns the timer speed and pushes it to every stage screen —
+ * over Realtime broadcast for instant response, and into the timer_state row so
+ * screens on WebSocket-blocking networks follow along too.
  */
 export function useSpeedControl() {
   const [segments, setSegments] = useState<SpeedSegment[]>(INITIAL_SEGMENTS);
@@ -488,7 +535,18 @@ export function useSpeedControl() {
           payload: { segments: segmentsRef.current },
         });
       })
-      .subscribe();
+            .subscribe();
+
+    // Adopt whatever speed is stored in the database, so a console that opens
+    // or reloads mid-show matches the speed the stage is already running at.
+    void readSpeedSegments().then((stored) => {
+      const clean = sanitizeSegments(stored);
+      if (clean && lastFrom(clean) > lastFrom(segmentsRef.current)) {
+        segmentsRef.current = clean;
+        setSegments(clean);
+      }
+    });
+
     return () => {
       channelRef.current = null;
       void supabase.removeChannel(channel);
@@ -502,11 +560,12 @@ export function useSpeedControl() {
     const updated = [...previous, { from: Date.now(), rate: safe }].slice(-200);
     segmentsRef.current = updated;
     setSegments(updated);
-    void channelRef.current?.send({
+        void channelRef.current?.send({
       type: "broadcast",
       event: "set",
       payload: { segments: updated },
     });
+    void patchStageSettings({ speed_segments: updated });
   }, []);
 
   const rate = (segments[segments.length - 1]?.rate ?? 1) as SpeedRate;
